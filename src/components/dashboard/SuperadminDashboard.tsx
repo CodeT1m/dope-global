@@ -1,0 +1,126 @@
+import { User } from "@supabase/supabase-js";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { Crown, Users, Camera, Image, LogOut } from "lucide-react";
+import dopeLogo from "@/assets/dope-logo.png";
+
+interface SuperadminDashboardProps {
+  user: User;
+}
+
+const SuperadminDashboard = ({ user }: SuperadminDashboardProps) => {
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src={dopeLogo} alt="DOPE" className="h-10 w-auto" />
+            <div className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-accent" />
+              <span className="font-semibold">Superadmin Dashboard</span>
+            </div>
+          </div>
+          <Button onClick={handleSignOut} variant="outline" size="sm">
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">
+            <span className="text-gradient">Welcome, Superadmin</span>
+          </h1>
+          <p className="text-muted-foreground">
+            {user.email}
+          </p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="gradient-card p-6 rounded-xl shadow-elevated">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                <Users className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Users</p>
+                <p className="text-2xl font-bold">0</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="gradient-card p-6 rounded-xl shadow-elevated">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 gradient-accent rounded-lg flex items-center justify-center">
+                <Camera className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Photographers</p>
+                <p className="text-2xl font-bold">0</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="gradient-card p-6 rounded-xl shadow-elevated">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                <Image className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Events</p>
+                <p className="text-2xl font-bold">0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="gradient-card p-8 rounded-xl shadow-elevated">
+          <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Button className="gradient-primary justify-start h-auto py-4">
+              <Users className="h-5 w-5 mr-3" />
+              <div className="text-left">
+                <div className="font-semibold">Manage Photographers</div>
+                <div className="text-xs text-primary-foreground/70">Approve, suspend, or edit</div>
+              </div>
+            </Button>
+
+            <Button className="gradient-accent justify-start h-auto py-4">
+              <Crown className="h-5 w-5 mr-3" />
+              <div className="text-left">
+                <div className="font-semibold">Platform Settings</div>
+                <div className="text-xs text-accent-foreground/70">Configure features & pricing</div>
+              </div>
+            </Button>
+          </div>
+        </div>
+
+        {/* Coming Soon Notice */}
+        <div className="mt-8 text-center gradient-card p-12 rounded-xl">
+          <h3 className="text-2xl font-bold mb-4 text-gradient">
+            Full Dashboard Coming Soon
+          </h3>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            The complete superadmin dashboard with user management, analytics, 
+            meme moderation, and platform configuration is under development.
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default SuperadminDashboard;

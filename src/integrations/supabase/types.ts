@@ -14,16 +14,293 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          event_date: string
+          id: string
+          is_active: boolean | null
+          location: string | null
+          organizer_link: string | null
+          organizer_name: string | null
+          photographer_id: string
+          qr_code_url: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          event_date: string
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          organizer_link?: string | null
+          organizer_name?: string | null
+          photographer_id: string
+          qr_code_url?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          event_date?: string
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          organizer_link?: string | null
+          organizer_name?: string | null
+          photographer_id?: string
+          qr_code_url?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      memes: {
+        Row: {
+          approved_by: string | null
+          caption: string
+          created_at: string | null
+          event_id: string
+          id: string
+          image_url: string
+          is_approved: boolean | null
+          likes_count: number | null
+          photo_id: string
+          user_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          caption: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          image_url: string
+          is_approved?: boolean | null
+          likes_count?: number | null
+          photo_id: string
+          user_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          caption?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          image_url?: string
+          is_approved?: boolean | null
+          likes_count?: number | null
+          photo_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memes_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photo_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          photo_id: string
+          reaction_type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          photo_id: string
+          reaction_type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          photo_id?: string
+          reaction_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_reactions_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          event_id: string
+          file_url: string
+          id: string
+          photographer_id: string
+          reactions_clap: number | null
+          reactions_fire: number | null
+          reactions_laugh: number | null
+          stars_count: number | null
+          thumbnail_url: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          event_id: string
+          file_url: string
+          id?: string
+          photographer_id: string
+          reactions_clap?: number | null
+          reactions_fire?: number | null
+          reactions_laugh?: number | null
+          stars_count?: number | null
+          thumbnail_url?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          event_id?: string
+          file_url?: string
+          id?: string
+          photographer_id?: string
+          reactions_clap?: number | null
+          reactions_fire?: number | null
+          reactions_laugh?: number | null
+          stars_count?: number | null
+          thumbnail_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          behance_url: string | null
+          bio: string | null
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          instagram_handle: string | null
+          linkedin_url: string | null
+          updated_at: string | null
+          x_handle: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          behance_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          instagram_handle?: string | null
+          linkedin_url?: string | null
+          updated_at?: string | null
+          x_handle?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          behance_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          instagram_handle?: string | null
+          linkedin_url?: string | null
+          updated_at?: string | null
+          x_handle?: string | null
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_name: string
+          badge_type: string
+          earned_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_name: string
+          badge_type: string
+          earned_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_name?: string
+          badge_type?: string
+          earned_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin_or_superadmin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "superadmin" | "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +427,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["superadmin", "admin", "user"],
+    },
   },
 } as const
