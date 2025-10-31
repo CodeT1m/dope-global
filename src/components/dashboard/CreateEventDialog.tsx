@@ -11,9 +11,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Upload } from "lucide-react";
 
 interface CreateEventDialogProps {
   onEventCreated: () => void;
@@ -22,6 +23,10 @@ interface CreateEventDialogProps {
 const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -57,6 +62,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
         .single();
 
       if (eventError) throw eventError;
+      setCreatedEventId(event.id);
 
       // Generate QR code
       const { error: qrError } = await supabase.functions.invoke('generate-qr', {
@@ -65,27 +71,21 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
 
       if (qrError) {
         console.error('QR generation error:', qrError);
-        toast({
-          title: "Event created",
-          description: "Event created but QR code generation failed. You can regenerate it later.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success!",
-          description: "Event created with QR code",
-        });
       }
 
-      setOpen(false);
-      setFormData({
-        title: "",
-        description: "",
-        eventDate: "",
-        location: "",
-        organizerName: "",
-        organizerLink: "",
+      // Upload photos if any selected
+      if (selectedFiles.length > 0) {
+        setUploadingPhotos(true);
+        await uploadPhotos(event.id, user.id);
+      }
+
+      toast({
+        title: "Success!",
+        description: `Event created${selectedFiles.length > 0 ? ' with photos' : ''}`,
       });
+
+      setOpen(false);
+      resetForm();
       onEventCreated();
     } catch (error: any) {
       toast({
@@ -95,6 +95,60 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
       });
     } finally {
       setLoading(false);
+      setUploadingPhotos(false);
+    }
+  };
+
+  const uploadPhotos = async (eventId: string, userId: string) => {
+    const totalFiles = selectedFiles.length;
+    
+    for (let i = 0; i < totalFiles; i++) {
+      const file = selectedFiles[i];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${eventId}/${Math.random()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('event-photos')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('event-photos')
+        .getPublicUrl(fileName);
+
+      const { error: insertError } = await supabase
+        .from('photos')
+        .insert({
+          event_id: eventId,
+          file_url: publicUrl,
+          photographer_id: userId,
+        });
+
+      if (insertError) throw insertError;
+      
+      setUploadProgress(Math.round(((i + 1) / totalFiles) * 100));
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      eventDate: "",
+      location: "",
+      organizerName: "",
+      organizerLink: "",
+    });
+    setSelectedFiles([]);
+    setUploadProgress(0);
+    setCreatedEventId(null);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setSelectedFiles(Array.from(files));
     }
   };
 
@@ -179,13 +233,50 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="photos">Upload Photos (Optional)</Label>
+            <div className="flex items-center gap-3">
+              <label htmlFor="photos">
+                <Button type="button" variant="outline" asChild>
+                  <span>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Select Photos
+                  </span>
+                </Button>
+              </label>
+              {selectedFiles.length > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {selectedFiles.length} file(s) selected
+                </span>
+              )}
+            </div>
+            <input
+              id="photos"
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+          </div>
+
+          {uploadingPhotos && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Uploading photos...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="gradient-primary">
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Event
+            <Button type="submit" disabled={loading || uploadingPhotos} className="gradient-primary">
+              {(loading || uploadingPhotos) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {uploadingPhotos ? "Uploading Photos..." : "Create Event"}
             </Button>
           </div>
         </form>

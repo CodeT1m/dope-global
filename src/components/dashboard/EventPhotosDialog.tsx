@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Trash2 } from "lucide-react";
 
 interface Photo {
@@ -25,6 +24,7 @@ const EventPhotosDialog = ({ eventId, eventTitle, open, onOpenChange }: EventPho
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -51,17 +51,31 @@ const EventPhotosDialog = ({ eventId, eventTitle, open, onOpenChange }: EventPho
     }
   }, [open, eventId]);
 
-  const handlePhotoUpload = async (files: FileList | null) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+    setUploadProgress(0);
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to upload photos",
+        variant: "destructive",
+      });
+      setUploading(false);
+      return;
+    }
 
-      for (const file of Array.from(files)) {
+    try {
+      const totalFiles = files.length;
+      
+      for (let i = 0; i < totalFiles; i++) {
+        const file = files[i];
         const fileExt = file.name.split('.').pop();
-        const fileName = `${eventId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const fileName = `${eventId}/${Math.random()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('event-photos')
@@ -73,31 +87,36 @@ const EventPhotosDialog = ({ eventId, eventTitle, open, onOpenChange }: EventPho
           .from('event-photos')
           .getPublicUrl(fileName);
 
-        const { error: photoError } = await supabase
+        const { error: insertError } = await supabase
           .from('photos')
           .insert({
             event_id: eventId,
-            photographer_id: user.id,
             file_url: publicUrl,
-            thumbnail_url: publicUrl
+            photographer_id: user.id,
           });
 
-        if (photoError) throw photoError;
+        if (insertError) throw insertError;
+        
+        // Update progress
+        setUploadProgress(Math.round(((i + 1) / totalFiles) * 100));
       }
 
       toast({
-        title: "Success!",
-        description: `${files.length} photo(s) uploaded successfully`,
+        title: "Success",
+        description: `${totalFiles} photo(s) uploaded successfully`,
       });
+
       fetchPhotos();
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: "Upload failed",
         description: error.message,
         variant: "destructive",
       });
     } finally {
       setUploading(false);
+      setUploadProgress(0);
+      e.target.value = '';
     }
   };
 
@@ -129,8 +148,10 @@ const EventPhotosDialog = ({ eventId, eventTitle, open, onOpenChange }: EventPho
   };
 
   const togglePhotoSelection = (photoId: string) => {
-    setSelectedPhotos(prev =>
-      prev.includes(photoId) ? prev.filter(id => id !== photoId) : [...prev, photoId]
+    setSelectedPhotos((prev) =>
+      prev.includes(photoId)
+        ? prev.filter((id) => id !== photoId)
+        : [...prev, photoId]
     );
   };
 
@@ -142,32 +163,50 @@ const EventPhotosDialog = ({ eventId, eventTitle, open, onOpenChange }: EventPho
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="flex gap-3">
-            <Label htmlFor="photo-upload" className="cursor-pointer">
-              <Button variant="outline" size="sm" asChild disabled={uploading}>
-                <span>
-                  <Upload className="h-4 w-4 mr-2" />
-                  {uploading ? "Uploading..." : "Upload Photos"}
-                </span>
-              </Button>
-            </Label>
-            <Input
-              id="photo-upload"
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => handlePhotoUpload(e.target.files)}
-            />
+          {/* Upload Button */}
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <label htmlFor="photo-upload">
+                <Button disabled={uploading} asChild>
+                  <span>
+                    <Upload className="h-4 w-4 mr-2" />
+                    {uploading ? "Uploading..." : "Upload Photos"}
+                  </span>
+                </Button>
+              </label>
+              <input
+                id="photo-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handlePhotoUpload}
+              />
 
-            {selectedPhotos.length > 0 && (
-              <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Selected ({selectedPhotos.length})
-              </Button>
+              {selectedPhotos.length > 0 && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteSelected}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Selected ({selectedPhotos.length})
+                </Button>
+              )}
+            </div>
+
+            {/* Upload Progress */}
+            {uploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Uploading...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
             )}
           </div>
 
+          {/* Photos Grid */}
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Loading photos...</div>
           ) : photos.length === 0 ? (
@@ -180,11 +219,11 @@ const EventPhotosDialog = ({ eventId, eventTitle, open, onOpenChange }: EventPho
                     <Checkbox
                       checked={selectedPhotos.includes(photo.id)}
                       onCheckedChange={() => togglePhotoSelection(photo.id)}
-                      className="bg-background"
+                      className="bg-background shadow-lg"
                     />
                   </div>
                   <img
-                    src={photo.thumbnail_url}
+                    src={photo.file_url}
                     alt="Event photo"
                     className="w-full aspect-square object-cover rounded-lg"
                   />

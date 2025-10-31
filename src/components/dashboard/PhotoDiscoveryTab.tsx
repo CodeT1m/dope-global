@@ -199,15 +199,14 @@ const PhotoDiscoveryTab = () => {
         )}
       </Card>
 
-      {/* Info Card */}
+      {/* Memory Lane - Results will show here */}
       <Card className="p-6 bg-muted/50">
-        <h3 className="font-bold mb-2">How it works</h3>
-        <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>• Upload a clear photo of your face or take a selfie</li>
-          <li>• Our AI will scan all event photos to find you</li>
-          <li>• Get instant access to all photos you're in</li>
-          <li>• React, star, and create memes from your photos</li>
-        </ul>
+        <h3 className="font-bold text-xl mb-4">
+          <span className="text-gradient">Memory Lane</span>
+        </h3>
+        <p className="text-sm text-muted-foreground text-center py-8">
+          Your matching photos will appear here after you upload your photo and search
+        </p>
       </Card>
     </div>
   );

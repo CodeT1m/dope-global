@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Image, QrCode, Trash2, Edit, ImagePlus } from "lucide-react";
+import { Calendar, MapPin, Image, QrCode, Trash2, Edit, ImagePlus, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EventEditDialog from "./EventEditDialog";
 import EventPhotosDialog from "./EventPhotosDialog";
@@ -17,6 +17,8 @@ interface Event {
   organizer_link: string;
   qr_code_url: string;
   created_at: string;
+  cover_image_url?: string;
+  photo_count?: number;
 }
 
 const EventsListTab = () => {
@@ -32,7 +34,10 @@ const EventsListTab = () => {
 
     const { data, error } = await supabase
       .from("events")
-      .select("*")
+      .select(`
+        *,
+        photos(id, file_url)
+      `)
       .eq("photographer_id", user.id)
       .order("event_date", { ascending: false });
 
@@ -44,7 +49,20 @@ const EventsListTab = () => {
         variant: "destructive",
       });
     } else {
-      setEvents(data || []);
+      // Process events to add cover image and photo count
+      const processedEvents = (data || []).map((event: any) => {
+        const photos = event.photos || [];
+        const randomPhoto = photos.length > 0 ? photos[Math.floor(Math.random() * photos.length)] : null;
+        
+        return {
+          ...event,
+          cover_image_url: randomPhoto?.file_url,
+          photo_count: photos.length,
+          photos: undefined, // Remove photos array from final object
+        };
+      });
+      
+      setEvents(processedEvents);
     }
     setLoading(false);
   };
@@ -109,24 +127,33 @@ const EventsListTab = () => {
 
       <div className="space-y-6">
         {events.map((event) => (
-        <Card key={event.id} className="p-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Event QR Code */}
-            {event.qr_code_url && (
-              <div className="md:w-32 md:h-32 w-full">
+        <Card key={event.id} className="overflow-hidden">
+          <div className="grid md:grid-cols-[200px_1fr_200px] gap-6">
+            {/* Cover Photo */}
+            <div className="md:h-48 h-64 bg-muted relative overflow-hidden">
+              {event.cover_image_url ? (
                 <img
-                  src={event.qr_code_url}
-                  alt="Event QR Code"
-                  className="w-full h-full object-contain border border-border rounded-lg"
+                  src={event.cover_image_url}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
                 />
-              </div>
-            )}
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Image className="h-12 w-12 text-muted-foreground/50" />
+                </div>
+              )}
+              {event.photo_count !== undefined && (
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                  {event.photo_count} photo{event.photo_count !== 1 ? 's' : ''}
+                </div>
+              )}
+            </div>
 
             {/* Event Details */}
-            <div className="flex-1">
+            <div className="p-6">
               <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
               {event.description && (
-                <p className="text-muted-foreground mb-3">{event.description}</p>
+                <p className="text-muted-foreground mb-3 line-clamp-2">{event.description}</p>
               )}
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
@@ -146,14 +173,14 @@ const EventsListTab = () => {
               </div>
 
               {/* Actions */}
-              <div className="mt-4 flex flex-wrap gap-3">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setEditingEvent(event)}
                 >
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit Event
+                  Edit
                 </Button>
 
                 <Button
@@ -162,19 +189,8 @@ const EventsListTab = () => {
                   onClick={() => setManagingPhotosEvent({ id: event.id, title: event.title })}
                 >
                   <ImagePlus className="h-4 w-4 mr-2" />
-                  Manage Photos
+                  Photos
                 </Button>
-
-                {event.qr_code_url && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(event.qr_code_url, '_blank')}
-                  >
-                    <QrCode className="h-4 w-4 mr-2" />
-                    View QR
-                  </Button>
-                )}
 
                 <Button
                   variant="destructive"
@@ -185,6 +201,33 @@ const EventsListTab = () => {
                   Delete
                 </Button>
               </div>
+            </div>
+
+            {/* QR Code Section */}
+            <div className="p-6 bg-muted/30 flex flex-col items-center justify-center">
+              {event.qr_code_url ? (
+                <>
+                  <img
+                    src={event.qr_code_url}
+                    alt="Event QR Code"
+                    className="w-32 h-32 object-contain mb-3"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(event.qr_code_url, '_blank')}
+                    className="w-full"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download QR
+                  </Button>
+                </>
+              ) : (
+                <div className="text-center text-muted-foreground text-sm">
+                  <QrCode className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  No QR Code
+                </div>
+              )}
             </div>
           </div>
         </Card>
