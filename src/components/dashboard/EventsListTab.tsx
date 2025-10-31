@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Image, QrCode, Upload, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Image, QrCode, Trash2, Edit, ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import EventEditDialog from "./EventEditDialog";
+import EventPhotosDialog from "./EventPhotosDialog";
 
 interface Event {
   id: string;
@@ -14,6 +14,7 @@ interface Event {
   event_date: string;
   location: string;
   organizer_name: string;
+  organizer_link: string;
   qr_code_url: string;
   created_at: string;
 }
@@ -21,7 +22,8 @@ interface Event {
 const EventsListTab = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploadingEventId, setUploadingEventId] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [managingPhotosEvent, setManagingPhotosEvent] = useState<{ id: string; title: string } | null>(null);
   const { toast } = useToast();
 
   const fetchEvents = async () => {
@@ -51,58 +53,6 @@ const EventsListTab = () => {
     fetchEvents();
   }, []);
 
-  const handlePhotoUpload = async (eventId: string, files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    setUploadingEventId(eventId);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      for (const file of Array.from(files)) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${eventId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-        // Upload to storage
-        const { error: uploadError } = await supabase.storage
-          .from('event-photos')
-          .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('event-photos')
-          .getPublicUrl(fileName);
-
-        // Create photo record
-        const { error: photoError } = await supabase
-          .from('photos')
-          .insert({
-            event_id: eventId,
-            photographer_id: user.id,
-            file_url: publicUrl,
-            thumbnail_url: publicUrl
-          });
-
-        if (photoError) throw photoError;
-      }
-
-      toast({
-        title: "Success!",
-        description: `${files.length} photo(s) uploaded successfully`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingEventId(null);
-    }
-  };
 
   const handleDelete = async (eventId: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
@@ -138,8 +88,27 @@ const EventsListTab = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {events.map((event) => (
+    <>
+      {editingEvent && (
+        <EventEditDialog
+          event={editingEvent}
+          open={!!editingEvent}
+          onOpenChange={(open) => !open && setEditingEvent(null)}
+          onSuccess={fetchEvents}
+        />
+      )}
+
+      {managingPhotosEvent && (
+        <EventPhotosDialog
+          eventId={managingPhotosEvent.id}
+          eventTitle={managingPhotosEvent.title}
+          open={!!managingPhotosEvent}
+          onOpenChange={(open) => !open && setManagingPhotosEvent(null)}
+        />
+      )}
+
+      <div className="space-y-6">
+        {events.map((event) => (
         <Card key={event.id} className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Event QR Code */}
@@ -178,28 +147,23 @@ const EventsListTab = () => {
 
               {/* Actions */}
               <div className="mt-4 flex flex-wrap gap-3">
-                <Label htmlFor={`upload-${event.id}`} className="cursor-pointer">
-                  <Button variant="outline" size="sm" asChild disabled={uploadingEventId === event.id}>
-                    <span>
-                      {uploadingEventId === event.id ? (
-                        <>Uploading...</>
-                      ) : (
-                        <>
-                          <Upload className="h-4 w-4 mr-2" />
-                          Upload Photos
-                        </>
-                      )}
-                    </span>
-                  </Button>
-                </Label>
-                <Input
-                  id={`upload-${event.id}`}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => handlePhotoUpload(event.id, e.target.files)}
-                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingEvent(event)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Event
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setManagingPhotosEvent({ id: event.id, title: event.title })}
+                >
+                  <ImagePlus className="h-4 w-4 mr-2" />
+                  Manage Photos
+                </Button>
 
                 {event.qr_code_url && (
                   <Button
@@ -224,8 +188,9 @@ const EventsListTab = () => {
             </div>
           </div>
         </Card>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 };
 

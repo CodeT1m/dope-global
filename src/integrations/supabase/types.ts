@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      event_attendees: {
+        Row: {
+          attended_at: string | null
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          attended_at?: string | null
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          attended_at?: string | null
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           cover_image_url: string | null

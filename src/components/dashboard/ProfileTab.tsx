@@ -24,7 +24,6 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
     instagram_handle: "",
     x_handle: "",
     linkedin_url: "",
-    behance_url: "",
   });
 
   const [location, setLocation] = useState("");
@@ -50,7 +49,6 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
         instagram_handle: data.instagram_handle || "",
         x_handle: data.x_handle || "",
         linkedin_url: data.linkedin_url || "",
-        behance_url: data.behance_url || "",
       });
     }
   };
@@ -110,7 +108,6 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
           instagram_handle: profile.instagram_handle,
           x_handle: profile.x_handle,
           linkedin_url: profile.linkedin_url,
-          behance_url: profile.behance_url,
         })
         .eq("id", userId);
 
@@ -280,16 +277,6 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
                 <Linkedin className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="behance">Behance URL</Label>
-            <Input
-              id="behance"
-              value={profile.behance_url}
-              onChange={(e) => setProfile({ ...profile, behance_url: e.target.value })}
-              placeholder="https://behance.net/username"
-            />
           </div>
         </div>
       </Card>

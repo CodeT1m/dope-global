@@ -9,7 +9,7 @@ import dopeLogo from "@/assets/dope-logo.png";
 import SocialTab from "./SocialTab";
 import ProfileTab from "./ProfileTab";
 import PhotoDiscoveryTab from "./PhotoDiscoveryTab";
-import EventsBrowseTab from "./EventsBrowseTab";
+import UserEventsTab from "./UserEventsTab";
 
 interface UserDashboardProps {
   user: User;
@@ -76,7 +76,7 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
           </TabsContent>
 
           <TabsContent value="events">
-            <EventsBrowseTab />
+            <UserEventsTab />
           </TabsContent>
 
           <TabsContent value="social">
