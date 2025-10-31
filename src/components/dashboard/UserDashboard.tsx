@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Search, Image, Users, LogOut, UserCircle, Calendar } from "lucide-react";
 import dopeLogo from "@/assets/dope-logo.png";
-import SocialTab from "./SocialTab";
-import ProfileTab from "./ProfileTab";
 import PhotoDiscoveryTab from "./PhotoDiscoveryTab";
 import UserEventsTab from "./UserEventsTab";
+import SocialTab from "./SocialTab";
+import ProfileTab from "./ProfileTab";
 
 interface UserDashboardProps {
   user: User;
