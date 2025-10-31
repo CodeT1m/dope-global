@@ -19,6 +19,21 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
         </div>
 
+        {/* Header - positioned absolute over hero */}
+        <header className="absolute top-0 left-0 right-0 z-20 container mx-auto px-4 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src={dopeLogo} alt="DOPE Logo" className="h-12 w-auto" />
+            <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              DOPE
+            </span>
+          </div>
+          <Link to="/auth">
+            <Button variant="outline" className="shadow-elevated backdrop-blur-sm">
+              Login
+            </Button>
+          </Link>
+        </header>
+
         {/* Content */}
         <div className="relative z-10 container mx-auto px-4 py-20">
           <div className="max-w-5xl mx-auto text-center space-y-8 animate-fade-in-up">
