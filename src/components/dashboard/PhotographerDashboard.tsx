@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Camera, LogOut, Calendar, BarChart3, Sparkles } from "lucide-react";
+import { Camera, LogOut, Calendar, BarChart3, Sparkles, UserCircle } from "lucide-react";
 import dopeLogo from "@/assets/dope-logo.png";
 import CreateEventDialog from "./CreateEventDialog";
 import EventsListTab from "./EventsListTab";
 import MemesTab from "./MemesTab";
 import AnalyticsTab from "./AnalyticsTab";
+import ProfileTab from "./ProfileTab";
 
 interface PhotographerDashboardProps {
   user: User;
@@ -144,7 +145,7 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-8">
+          <TabsList className="grid w-full max-w-3xl grid-cols-4 mb-8">
             <TabsTrigger value="events">
               <Calendar className="h-4 w-4 mr-2" />
               Events
@@ -156,6 +157,10 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="profile">
+              <UserCircle className="h-4 w-4 mr-2" />
+              Profile
             </TabsTrigger>
           </TabsList>
 
@@ -169,6 +174,10 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
 
           <TabsContent value="analytics">
             <AnalyticsTab />
+          </TabsContent>
+
+          <TabsContent value="profile">
+            <ProfileTab userId={user.id} />
           </TabsContent>
         </Tabs>
       </main>
