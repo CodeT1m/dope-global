@@ -3,6 +3,12 @@ import { Camera, Sparkles, Users, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 import dopeLogo from "@/assets/dope-logo.png";
+import lovableLogo from "@/assets/partners/lovable.png";
+import aiTinkerersLogo from "@/assets/community/ai-tinkerers.png";
+import buildersClubLogo from "@/assets/community/builders-club.png";
+import loopholeHackersLogo from "@/assets/community/loophole-hackers.png";
+import fofKlLogo from "@/assets/community/fof-kl.png";
+import summyLogo from "@/assets/community/summy.png";
 
 const Index = () => {
   return (
@@ -91,6 +97,33 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Partners Section */}
+      <section className="py-16 px-4 bg-muted/20">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="text-gradient">Powered By</span>
+            </h2>
+          </div>
+          <div className="flex justify-center">
+            <a 
+              href="https://lovable.dev/invite/QIBH2NG" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group"
+            >
+              <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow transition-all">
+                <img 
+                  src={lovableLogo} 
+                  alt="Lovable" 
+                  className="h-16 w-auto mx-auto filter brightness-90 group-hover:brightness-110 transition-all"
+                />
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-24 px-4">
         <div className="container mx-auto">
@@ -168,50 +201,134 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="py-12 px-4 border-t border-border">
-        <div className="container mx-auto text-center space-y-4">
-          <div className="flex justify-center mb-4">
-            <img src={dopeLogo} alt="DOPE" className="h-12 w-auto opacity-80" />
+        <div className="container mx-auto">
+          {/* Community Logos Section */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-center mb-8">
+              <span className="text-gradient">Community</span>
+            </h3>
+            <div className="relative overflow-hidden">
+              <div className="flex gap-8 items-center justify-center flex-wrap">
+                <a 
+                  href="https://www.linkedin.com/company/ai-tinkerers-kuala-lumpur/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={aiTinkerersLogo} 
+                      alt="AI Tinkerers KL" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                <a 
+                  href="https://www.linkedin.com/company/the-builders-club-ai/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={buildersClubLogo} 
+                      alt="The Builders Club AI" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                <a 
+                  href="https://www.instagram.com/loopholehackers/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={loopholeHackersLogo} 
+                      alt="Loophole Hackers" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                <a 
+                  href="https://www.instagram.com/fof_kualalumpur/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={fofKlLogo} 
+                      alt="FOF Kuala Lumpur" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                <a 
+                  href="https://summysvc.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={summyLogo} 
+                      alt="Summy" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+              </div>
+            </div>
           </div>
-          <p className="text-muted-foreground">
-            Powered by DOPE • timinottimid
-          </p>
-          <div className="flex justify-center gap-6 text-sm">
-            <a 
-              href="https://instagram.com/timi.jpeng" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Instagram
-            </a>
-            <a 
-              href="https://linkedin.com/in/ileladewa-oluwatimilehin" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              LinkedIn
-            </a>
-            <a 
-              href="https://behance.net/timinottimid" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Behance
-            </a>
-            <a 
-              href="https://x.com/timinottimid" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              X (Twitter)
-            </a>
+
+          {/* Footer Bottom */}
+          <div className="text-center space-y-4 border-t border-border pt-8">
+            <div className="flex justify-center mb-4">
+              <img src={dopeLogo} alt="DOPE" className="h-12 w-auto opacity-80" />
+            </div>
+            <p className="text-muted-foreground">
+              Powered by DOPE • timinottimid
+            </p>
+            <div className="flex justify-center gap-6 text-sm">
+              <a 
+                href="https://instagram.com/timi.jpeng" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Instagram
+              </a>
+              <a 
+                href="https://linkedin.com/in/ileladewa-oluwatimilehin" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                LinkedIn
+              </a>
+              <a 
+                href="https://behance.net/timinottimid" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Behance
+              </a>
+              <a 
+                href="https://x.com/timinottimid" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                X (Twitter)
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground pt-4">
+              © 2025 DOPE. All rights reserved.
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground pt-4">
-            © 2025 DOPE. All rights reserved.
-          </p>
         </div>
       </footer>
     </div>
