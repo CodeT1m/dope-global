@@ -102,24 +102,41 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-gradient">Powered By</span>
+              <span className="text-gradient">Resources</span>
             </h2>
           </div>
-          <div className="flex justify-center">
-            <a 
-              href="https://lovable.dev/invite/QIBH2NG" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="group"
-            >
-              <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow transition-all">
-                <img 
-                  src={lovableLogo} 
-                  alt="Lovable" 
-                  className="h-16 w-auto mx-auto filter brightness-90 group-hover:brightness-110 transition-all"
-                />
-              </div>
-            </a>
+          <div className="overflow-hidden">
+            <div className="flex animate-scroll-horizontal gap-12 items-center">
+              <a 
+                href="https://lovable.dev/invite/QIBH2NG" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex-shrink-0 hover-scale"
+              >
+                <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow transition-all">
+                  <img 
+                    src={lovableLogo} 
+                    alt="Lovable" 
+                    className="h-16 w-auto filter brightness-90 hover:brightness-110 transition-all"
+                  />
+                </div>
+              </a>
+              {/* Duplicate for seamless loop */}
+              <a 
+                href="https://lovable.dev/invite/QIBH2NG" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex-shrink-0 hover-scale"
+              >
+                <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow transition-all">
+                  <img 
+                    src={lovableLogo} 
+                    alt="Lovable" 
+                    className="h-16 w-auto filter brightness-90 hover:brightness-110 transition-all"
+                  />
+                </div>
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -207,13 +224,13 @@ const Index = () => {
             <h3 className="text-2xl font-bold text-center mb-8">
               <span className="text-gradient">Community</span>
             </h3>
-            <div className="relative overflow-hidden">
-              <div className="flex gap-8 items-center justify-center flex-wrap">
+            <div className="overflow-hidden">
+              <div className="flex animate-scroll-horizontal gap-8 items-center">
                 <a 
                   href="https://www.linkedin.com/company/ai-tinkerers-kuala-lumpur/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group"
+                  className="flex-shrink-0 group"
                 >
                   <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
                     <img 
@@ -227,7 +244,7 @@ const Index = () => {
                   href="https://www.linkedin.com/company/the-builders-club-ai/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group"
+                  className="flex-shrink-0 group"
                 >
                   <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
                     <img 
@@ -241,7 +258,7 @@ const Index = () => {
                   href="https://www.instagram.com/loopholehackers/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group"
+                  className="flex-shrink-0 group"
                 >
                   <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
                     <img 
@@ -255,7 +272,7 @@ const Index = () => {
                   href="https://www.instagram.com/fof_kualalumpur/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group"
+                  className="flex-shrink-0 group"
                 >
                   <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
                     <img 
@@ -269,7 +286,78 @@ const Index = () => {
                   href="https://summysvc.com/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group"
+                  className="flex-shrink-0 group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={summyLogo} 
+                      alt="Summy" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                {/* Duplicate for seamless loop */}
+                <a 
+                  href="https://www.linkedin.com/company/ai-tinkerers-kuala-lumpur/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={aiTinkerersLogo} 
+                      alt="AI Tinkerers KL" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                <a 
+                  href="https://www.linkedin.com/company/the-builders-club-ai/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={buildersClubLogo} 
+                      alt="The Builders Club AI" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                <a 
+                  href="https://www.instagram.com/loopholehackers/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={loopholeHackersLogo} 
+                      alt="Loophole Hackers" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                <a 
+                  href="https://www.instagram.com/fof_kualalumpur/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 group"
+                >
+                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                    <img 
+                      src={fofKlLogo} 
+                      alt="FOF Kuala Lumpur" 
+                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                </a>
+                <a 
+                  href="https://summysvc.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 group"
                 >
                   <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
                     <img 
