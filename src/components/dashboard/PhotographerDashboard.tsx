@@ -1,9 +1,15 @@
+import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Camera, Plus, Image, BarChart, LogOut } from "lucide-react";
+import { Camera, LogOut, Calendar, BarChart3, Sparkles } from "lucide-react";
 import dopeLogo from "@/assets/dope-logo.png";
+import CreateEventDialog from "./CreateEventDialog";
+import EventsListTab from "./EventsListTab";
+import MemesTab from "./MemesTab";
+import AnalyticsTab from "./AnalyticsTab";
 
 interface PhotographerDashboardProps {
   user: User;
@@ -11,10 +17,59 @@ interface PhotographerDashboardProps {
 
 const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("events");
+  const [stats, setStats] = useState({
+    events: 0,
+    photos: 0,
+    reactions: 0,
+  });
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const fetchStats = async () => {
+    const { count: eventsCount } = await supabase
+      .from("events")
+      .select("*", { count: 'exact', head: true })
+      .eq("photographer_id", user.id);
+
+    const { count: photosCount } = await supabase
+      .from("photos")
+      .select("*", { count: 'exact', head: true })
+      .eq("photographer_id", user.id);
+
+    const { data: photos } = await supabase
+      .from("photos")
+      .select("id")
+      .eq("photographer_id", user.id);
+
+    const photoIds = photos?.map(p => p.id) || [];
+    let reactionsCount = 0;
+
+    if (photoIds.length > 0) {
+      const { count } = await supabase
+        .from("photo_reactions")
+        .select("*", { count: 'exact', head: true })
+        .in("photo_id", photoIds);
+      reactionsCount = count || 0;
+    }
+
+    setStats({
+      events: eventsCount || 0,
+      photos: photosCount || 0,
+      reactions: reactionsCount,
+    });
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, [refreshKey]);
+
+  const handleEventCreated = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -38,13 +93,14 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">
-            <span className="text-gradient">Your Studio</span>
-          </h1>
-          <p className="text-muted-foreground">
-            {user.email}
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">
+              <span className="text-gradient">Your Studio</span>
+            </h1>
+            <p className="text-muted-foreground">{user.email}</p>
+          </div>
+          <CreateEventDialog onEventCreated={handleEventCreated} />
         </div>
 
         {/* Stats Grid */}
@@ -52,11 +108,11 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
           <div className="gradient-card p-6 rounded-xl shadow-elevated">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                <Camera className="h-6 w-6 text-primary-foreground" />
+                <Calendar className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Active Events</p>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-2xl font-bold">{stats.events}</p>
               </div>
             </div>
           </div>
@@ -64,11 +120,11 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
           <div className="gradient-card p-6 rounded-xl shadow-elevated">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 gradient-accent rounded-lg flex items-center justify-center">
-                <Image className="h-6 w-6 text-accent-foreground" />
+                <Camera className="h-6 w-6 text-accent-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Photos</p>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-2xl font-bold">{stats.photos}</p>
               </div>
             </div>
           </div>
@@ -76,41 +132,45 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
           <div className="gradient-card p-6 rounded-xl shadow-elevated">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                <BarChart className="h-6 w-6 text-primary-foreground" />
+                <Sparkles className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Views</p>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-sm text-muted-foreground">Total Reactions</p>
+                <p className="text-2xl font-bold">{stats.reactions}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Create Event CTA */}
-        <div className="gradient-card p-12 rounded-xl shadow-elevated text-center mb-8">
-          <Camera className="h-16 w-16 mx-auto mb-6 text-primary animate-float" />
-          <h2 className="text-3xl font-bold mb-4">
-            <span className="text-gradient">Create Your First Event</span>
-          </h2>
-          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Start building your photography community by creating an event gallery. 
-            Upload photos, engage your audience, and let AI help attendees find themselves.
-          </p>
-          <Button size="lg" className="gradient-primary shadow-glow">
-            <Plus className="h-5 w-5 mr-2" />
-            Create Event
-          </Button>
-        </div>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-8">
+            <TabsTrigger value="events">
+              <Calendar className="h-4 w-4 mr-2" />
+              Events
+            </TabsTrigger>
+            <TabsTrigger value="memes">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Memes
+            </TabsTrigger>
+            <TabsTrigger value="analytics">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Coming Soon */}
-        <div className="text-center gradient-card p-8 rounded-xl">
-          <h3 className="text-xl font-bold mb-2 text-gradient">
-            Full Features Coming Soon
-          </h3>
-          <p className="text-muted-foreground">
-            Event management, photo uploads, meme approvals, and analytics dashboard
-          </p>
-        </div>
+          <TabsContent value="events">
+            <EventsListTab key={refreshKey} />
+          </TabsContent>
+
+          <TabsContent value="memes">
+            <MemesTab />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AnalyticsTab />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
