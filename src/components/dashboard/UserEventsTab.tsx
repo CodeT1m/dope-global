@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Image, ArrowLeft, Check, X, Download, FileText } from "lucide-react";
+import { Calendar, MapPin, Image, ArrowLeft, Check, X, Download, FileText, Star, AlertCircle } from "lucide-react";
 import LinkedInPostPanel from "./LinkedInPostPanel";
+import PhotoSlideshow from "./PhotoSlideshow";
+import PhotoRemovalDialog from "./PhotoRemovalDialog";
 
 interface Event {
   id: string;
@@ -16,7 +18,7 @@ interface Event {
   event_date: string;
   location: string;
   organizer_name: string;
-  cover_image_url: string;
+  cover_image_url?: string;
   photo_count?: number;
   attended?: boolean;
 }
@@ -25,6 +27,7 @@ interface Photo {
   id: string;
   file_url: string;
   thumbnail_url: string;
+  caption?: string;
 }
 
 const UserEventsTab = () => {
@@ -36,6 +39,10 @@ const UserEventsTab = () => {
   const [eventPhotos, setEventPhotos] = useState<Photo[]>([]);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [linkedInPanelOpen, setLinkedInPanelOpen] = useState(false);
+  const [slideshowOpen, setSlideshowOpen] = useState(false);
+  const [slideshowIndex, setSlideshowIndex] = useState(0);
+  const [removalDialogOpen, setRemovalDialogOpen] = useState(false);
+  const [removalPhotoId, setRemovalPhotoId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchEvents = async () => {
@@ -44,7 +51,7 @@ const UserEventsTab = () => {
 
       const { data: eventsData, error } = await supabase
         .from("events")
-        .select("*, photos(count)")
+        .select("*, photos(id, file_url)")
         .eq("is_active", true)
         .order("event_date", { ascending: false });
 
@@ -52,7 +59,9 @@ const UserEventsTab = () => {
 
       const eventsWithDetails = await Promise.all(
         (eventsData || []).map(async (event: any) => {
-          const photoCount = event.photos?.[0]?.count || 0;
+          const photos = event.photos || [];
+          const photoCount = photos.length;
+          const randomPhoto = photos.length > 0 ? photos[Math.floor(Math.random() * photos.length)] : null;
 
           let attended = false;
           if (user) {
@@ -72,7 +81,7 @@ const UserEventsTab = () => {
             event_date: event.event_date,
             location: event.location,
             organizer_name: event.organizer_name,
-            cover_image_url: event.cover_image_url,
+            cover_image_url: randomPhoto?.file_url,
             photo_count: photoCount,
             attended,
           };
@@ -212,6 +221,40 @@ const UserEventsTab = () => {
     );
   };
 
+  const toggleStar = async (photoId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const photo = eventPhotos.find(p => p.id === photoId) as any;
+    if (!photo) return;
+
+    if (photo.is_starred) {
+      await supabase
+        .from("photo_stars")
+        .delete()
+        .eq("photo_id", photoId)
+        .eq("user_id", user.id);
+    } else {
+      await supabase
+        .from("photo_stars")
+        .insert({ photo_id: photoId, user_id: user.id });
+    }
+
+    if (selectedEvent) {
+      fetchEventPhotos(selectedEvent.id);
+    }
+  };
+
+  const handlePhotoClick = (index: number) => {
+    setSlideshowIndex(index);
+    setSlideshowOpen(true);
+  };
+
+  const handleRemovalRequest = (photoId: string) => {
+    setRemovalPhotoId(photoId);
+    setRemovalDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {linkedInPanelOpen && selectedEvent && (
@@ -219,6 +262,22 @@ const UserEventsTab = () => {
           open={linkedInPanelOpen}
           onOpenChange={setLinkedInPanelOpen}
           eventTitle={selectedEvent.title}
+        />
+      )}
+
+      <PhotoSlideshow
+        photos={eventPhotos.map(p => ({ id: p.id, file_url: p.file_url, caption: p.caption }))}
+        currentIndex={slideshowIndex}
+        open={slideshowOpen}
+        onOpenChange={setSlideshowOpen}
+        onIndexChange={setSlideshowIndex}
+      />
+
+      {removalPhotoId && (
+        <PhotoRemovalDialog
+          photoId={removalPhotoId}
+          open={removalDialogOpen}
+          onOpenChange={setRemovalDialogOpen}
         />
       )}
 
@@ -289,20 +348,44 @@ const UserEventsTab = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {eventPhotos.map((photo) => (
+              {eventPhotos.map((photo, index) => (
                 <div key={photo.id} className="relative group">
                   <div className="absolute top-2 left-2 z-10">
                     <Checkbox
                       checked={selectedPhotos.includes(photo.id)}
                       onCheckedChange={() => togglePhotoSelection(photo.id)}
-                      className="bg-background shadow-lg"
+                      className="bg-background shadow-lg w-6 h-6"
                     />
+                  </div>
+                  <div className="absolute top-2 right-2 z-10 flex gap-2">
+                    <Button
+                      size="icon"
+                      variant={(photo as any).is_starred ? "default" : "secondary"}
+                      className="h-8 w-8 shadow-lg"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleStar(photo.id);
+                      }}
+                    >
+                      <Star className={`h-4 w-4 ${(photo as any).is_starred ? "fill-current" : ""}`} />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="h-8 w-8 shadow-lg"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemovalRequest(photo.id);
+                      }}
+                    >
+                      <AlertCircle className="h-4 w-4" />
+                    </Button>
                   </div>
                   <img
                     src={photo.file_url}
                     alt="Event photo"
                     className="w-full aspect-square object-cover rounded-lg cursor-pointer transition-transform hover:scale-105"
-                    onClick={() => window.open(photo.file_url, '_blank')}
+                    onClick={() => handlePhotoClick(index)}
                   />
                 </div>
               ))}

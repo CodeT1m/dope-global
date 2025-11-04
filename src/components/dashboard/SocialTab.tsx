@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, Calendar, Image as ImageIcon, Loader2 } from "lucide-react";
+import { MapPin, Calendar, Image as ImageIcon, Loader2, Camera, Star, UserPlus, UserMinus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import PhotographerReviewDialog from "./PhotographerReviewDialog";
 
 interface UserProfile {
   id: string;
   email: string;
   full_name: string | null;
   avatar_url: string | null;
+  is_photographer?: boolean;
+  is_following?: boolean;
 }
 
 interface EventWithPhotos {
@@ -26,6 +32,8 @@ const SocialTab = () => {
   const [locationFilter, setLocationFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
@@ -33,12 +41,39 @@ const SocialTab = () => {
 
   const fetchUsers = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('id, email, full_name, avatar_url');
 
       if (error) throw error;
-      setUsers(data || []);
+
+      // Check which users are photographers
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('role', ['admin', 'superadmin']);
+
+      const photographerIds = new Set(roles?.map(r => r.user_id) || []);
+
+      // Check follow status
+      let followingIds = new Set<string>();
+      if (user) {
+        const { data: following } = await supabase
+          .from('photographer_followers')
+          .select('photographer_id')
+          .eq('follower_id', user.id);
+        followingIds = new Set(following?.map(f => f.photographer_id) || []);
+      }
+
+      const usersWithMeta = (data || []).map(u => ({
+        ...u,
+        is_photographer: photographerIds.has(u.id),
+        is_following: followingIds.has(u.id),
+      }));
+
+      setUsers(usersWithMeta);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -89,6 +124,38 @@ const SocialTab = () => {
     fetchUserEvents(user.id);
   };
 
+  const handleFollowToggle = async (photographerId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const targetUser = users.find(u => u.id === photographerId);
+    if (!targetUser) return;
+
+    if (targetUser.is_following) {
+      await supabase
+        .from('photographer_followers')
+        .delete()
+        .eq('photographer_id', photographerId)
+        .eq('follower_id', user.id);
+      
+      toast({
+        title: "Unfollowed",
+        description: `You unfollowed ${targetUser.full_name || 'this photographer'}`,
+      });
+    } else {
+      await supabase
+        .from('photographer_followers')
+        .insert({ photographer_id: photographerId, follower_id: user.id });
+      
+      toast({
+        title: "Following",
+        description: `You're now following ${targetUser.full_name || 'this photographer'}`,
+      });
+    }
+
+    fetchUsers();
+  };
+
   const filteredUsers = users.filter(user => 
     !locationFilter || user.email.toLowerCase().includes(locationFilter.toLowerCase())
   );
@@ -103,6 +170,15 @@ const SocialTab = () => {
 
   return (
     <div className="space-y-6">
+      {selectedUser && selectedUser.is_photographer && (
+        <PhotographerReviewDialog
+          photographerId={selectedUser.id}
+          photographerName={selectedUser.full_name || selectedUser.email}
+          open={reviewDialogOpen}
+          onOpenChange={setReviewDialogOpen}
+        />
+      )}
+
       <div className="flex items-center gap-4">
         <div className="relative flex-1">
           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -129,14 +205,58 @@ const SocialTab = () => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold">
-                    {user.full_name?.[0] || user.email[0].toUpperCase()}
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold">
+                      {user.full_name?.[0] || user.email[0].toUpperCase()}
+                    </div>
+                    {user.is_photographer && (
+                      <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1">
+                        <Camera className="h-3 w-3 text-primary-foreground" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold">{user.full_name || 'Anonymous'}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">{user.full_name || 'Anonymous'}</p>
+                      {user.is_photographer && (
+                        <Badge variant="secondary" className="text-xs">
+                          Photographer
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
                   </div>
                 </div>
+                {user.is_photographer && (
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFollowToggle(user.id);
+                      }}
+                    >
+                      {user.is_following ? (
+                        <><UserMinus className="h-3 w-3 mr-1" />Unfollow</>
+                      ) : (
+                        <><UserPlus className="h-3 w-3 mr-1" />Follow</>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedUser(user);
+                        setReviewDialogOpen(true);
+                      }}
+                    >
+                      <Star className="h-3 w-3 mr-1" />
+                      Review
+                    </Button>
+                  </div>
+                )}
               </Card>
             ))}
             {filteredUsers.length === 0 && (

@@ -8,6 +8,7 @@ import { Search, Image, Users, LogOut, UserCircle, Calendar } from "lucide-react
 import dopeLogo from "@/assets/dope-logo.png";
 import PhotoDiscoveryTab from "./PhotoDiscoveryTab";
 import UserEventsTab from "./UserEventsTab";
+import FeedTab from "./FeedTab";
 import SocialTab from "./SocialTab";
 import ProfileTab from "./ProfileTab";
 
@@ -52,7 +53,7 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full max-w-3xl grid-cols-4">
+          <TabsList className="grid w-full max-w-3xl grid-cols-5">
             <TabsTrigger value="discover">
               <Search className="h-4 w-4 mr-2" />
               Discover
@@ -60,6 +61,10 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
             <TabsTrigger value="events">
               <Calendar className="h-4 w-4 mr-2" />
               Events
+            </TabsTrigger>
+            <TabsTrigger value="feed">
+              <Image className="h-4 w-4 mr-2" />
+              Feed
             </TabsTrigger>
             <TabsTrigger value="social">
               <Users className="h-4 w-4 mr-2" />
@@ -77,6 +82,10 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
 
           <TabsContent value="events">
             <UserEventsTab />
+          </TabsContent>
+
+          <TabsContent value="feed">
+            <FeedTab />
           </TabsContent>
 
           <TabsContent value="social">

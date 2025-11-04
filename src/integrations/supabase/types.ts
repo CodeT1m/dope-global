@@ -49,6 +49,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           event_date: string
+          hashtags: string[] | null
           id: string
           is_active: boolean | null
           location: string | null
@@ -64,6 +65,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           event_date: string
+          hashtags?: string[] | null
           id?: string
           is_active?: boolean | null
           location?: string | null
@@ -79,6 +81,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           event_date?: string
+          hashtags?: string[] | null
           id?: string
           is_active?: boolean | null
           location?: string | null
@@ -176,6 +179,130 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      photo_removal_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          photo_id: string
+          reason: string | null
+          requester_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          photo_id: string
+          reason?: string | null
+          requester_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          photo_id?: string
+          reason?: string | null
+          requester_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_removal_requests_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photo_stars: {
+        Row: {
+          id: string
+          photo_id: string
+          starred_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          photo_id: string
+          starred_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          photo_id?: string
+          starred_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_stars_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photographer_followers: {
+        Row: {
+          followed_at: string | null
+          follower_id: string
+          id: string
+          photographer_id: string
+        }
+        Insert: {
+          followed_at?: string | null
+          follower_id: string
+          id?: string
+          photographer_id: string
+        }
+        Update: {
+          followed_at?: string | null
+          follower_id?: string
+          id?: string
+          photographer_id?: string
+        }
+        Relationships: []
+      }
+      photographer_reviews: {
+        Row: {
+          created_at: string | null
+          id: string
+          photographer_id: string
+          rating: number
+          review_text: string | null
+          reviewer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          photographer_id: string
+          rating: number
+          review_text?: string | null
+          reviewer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          photographer_id?: string
+          rating?: number
+          review_text?: string | null
+          reviewer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       photos: {
         Row: {

@@ -36,6 +36,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
     location: "",
     organizerName: "",
     organizerLink: "",
+    hashtags: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,6 +48,11 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
       if (!user) throw new Error("Not authenticated");
 
       // Create event
+      const hashtagsArray = formData.hashtags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+
       const { data: event, error: eventError } = await supabase
         .from("events")
         .insert({
@@ -56,6 +62,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
           location: formData.location,
           organizer_name: formData.organizerName,
           organizer_link: formData.organizerLink,
+          hashtags: hashtagsArray,
           photographer_id: user.id,
         })
         .select()
@@ -139,6 +146,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
       location: "",
       organizerName: "",
       organizerLink: "",
+      hashtags: "",
     });
     setSelectedFiles([]);
     setUploadProgress(0);
@@ -230,6 +238,16 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Tell attendees about your event..."
               rows={4}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="hashtags">Hashtags (comma-separated)</Label>
+            <Input
+              id="hashtags"
+              value={formData.hashtags}
+              onChange={(e) => setFormData({ ...formData, hashtags: e.target.value })}
+              placeholder="AI, Community, Networking"
             />
           </div>
 
