@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Camera, LogOut, Calendar, BarChart3, Sparkles, UserCircle } from "lucide-react";
+import { Camera, LogOut, Calendar, BarChart3, AlertCircle, UserCircle, Heart } from "lucide-react";
 import dopeLogo from "@/assets/dope-logo.png";
 import CreateEventDialog from "./CreateEventDialog";
 import EventsListTab from "./EventsListTab";
-import MemesTab from "./MemesTab";
+import RemoveRequestsTab from "./RemoveRequestsTab";
 import AnalyticsTab from "./AnalyticsTab";
 import ProfileTab from "./ProfileTab";
 
@@ -133,7 +133,7 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
           <div className="gradient-card p-6 rounded-xl shadow-elevated">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-primary-foreground" />
+                <Heart className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Reactions</p>
@@ -150,9 +150,9 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
               <Calendar className="h-4 w-4 mr-2" />
               Events
             </TabsTrigger>
-            <TabsTrigger value="memes">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Memes
+            <TabsTrigger value="requests">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              Removal Requests
             </TabsTrigger>
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
@@ -168,8 +168,8 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
             <EventsListTab key={refreshKey} />
           </TabsContent>
 
-          <TabsContent value="memes">
-            <MemesTab />
+          <TabsContent value="requests">
+            <RemoveRequestsTab />
           </TabsContent>
 
           <TabsContent value="analytics">
