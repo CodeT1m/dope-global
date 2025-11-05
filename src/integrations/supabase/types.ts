@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      blog_posts: {
+        Row: {
+          category: string | null
+          content: string
+          cover_photo_id: string | null
+          created_at: string | null
+          event_id: string
+          hashtags: string[] | null
+          id: string
+          photographer_id: string
+          tag_timi: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          cover_photo_id?: string | null
+          created_at?: string | null
+          event_id: string
+          hashtags?: string[] | null
+          id?: string
+          photographer_id: string
+          tag_timi?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          cover_photo_id?: string | null
+          created_at?: string | null
+          event_id?: string
+          hashtags?: string[] | null
+          id?: string
+          photographer_id?: string
+          tag_timi?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_cover_photo_id_fkey"
+            columns: ["cover_photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_attendees: {
         Row: {
           attended_at: string | null

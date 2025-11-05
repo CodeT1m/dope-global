@@ -61,7 +61,8 @@ const UserEventsTab = () => {
         (eventsData || []).map(async (event: any) => {
           const photos = event.photos || [];
           const photoCount = photos.length;
-          const randomPhoto = photos.length > 0 ? photos[Math.floor(Math.random() * photos.length)] : null;
+          // Use the first photo as cover image for consistency
+          const coverPhoto = photos.length > 0 ? photos[0] : null;
 
           let attended = false;
           if (user) {
@@ -81,7 +82,7 @@ const UserEventsTab = () => {
             event_date: event.event_date,
             location: event.location,
             organizer_name: event.organizer_name,
-            cover_image_url: randomPhoto?.file_url,
+            cover_image_url: coverPhoto?.file_url,
             photo_count: photoCount,
             attended,
           };
@@ -103,6 +104,8 @@ const UserEventsTab = () => {
   };
 
   const fetchEventPhotos = async (eventId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data, error } = await supabase
       .from("photos")
       .select("*")
@@ -111,9 +114,26 @@ const UserEventsTab = () => {
 
     if (error) {
       console.error("Error fetching photos:", error);
-    } else {
-      setEventPhotos(data || []);
+      return;
     }
+
+    // Fetch star information for each photo
+    const photoIds = data?.map(p => p.id) || [];
+    const { data: starData } = await supabase
+      .from("photo_stars")
+      .select("photo_id, user_id")
+      .in("photo_id", photoIds);
+
+    const photosWithStars = data?.map(photo => {
+      const photoStars = starData?.filter(s => s.photo_id === photo.id) || [];
+      return {
+        ...photo,
+        is_starred: user ? photoStars.some(s => s.user_id === user.id) : false,
+        stars_count: photoStars.length,
+      };
+    }) || [];
+
+    setEventPhotos(photosWithStars);
   };
 
   useEffect(() => {

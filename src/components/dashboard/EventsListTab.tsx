@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Image, QrCode, Trash2, Edit, ImagePlus, Download } from "lucide-react";
+import { Calendar, MapPin, Image, QrCode, Trash2, Edit, ImagePlus, Download, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EventEditDialog from "./EventEditDialog";
 import EventPhotosDialog from "./EventPhotosDialog";
+import BlogPostDialog from "./BlogPostDialog";
 
 interface Event {
   id: string;
@@ -26,6 +27,7 @@ const EventsListTab = () => {
   const [loading, setLoading] = useState(true);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [managingPhotosEvent, setManagingPhotosEvent] = useState<{ id: string; title: string } | null>(null);
+  const [blogPostEvent, setBlogPostEvent] = useState<{ id: string; title: string } | null>(null);
   const { toast } = useToast();
 
   const fetchEvents = async () => {
@@ -52,11 +54,12 @@ const EventsListTab = () => {
       // Process events to add cover image and photo count
       const processedEvents = (data || []).map((event: any) => {
         const photos = event.photos || [];
-        const randomPhoto = photos.length > 0 ? photos[Math.floor(Math.random() * photos.length)] : null;
+        // Use the first photo as cover image for consistency
+        const coverPhoto = photos.length > 0 ? photos[0] : null;
         
         return {
           ...event,
-          cover_image_url: randomPhoto?.file_url,
+          cover_image_url: coverPhoto?.file_url,
           photo_count: photos.length,
           photos: undefined, // Remove photos array from final object
         };
@@ -125,6 +128,17 @@ const EventsListTab = () => {
         />
       )}
 
+      {blogPostEvent && (
+        <BlogPostDialog
+          eventId={blogPostEvent.id}
+          eventTitle={blogPostEvent.title}
+          open={!!blogPostEvent}
+          onOpenChange={(open) => {
+            if (!open) setBlogPostEvent(null);
+          }}
+        />
+      )}
+
       <div className="space-y-6">
         {events.map((event) => (
         <Card key={event.id} className="overflow-hidden">
@@ -190,6 +204,15 @@ const EventsListTab = () => {
                 >
                   <ImagePlus className="h-4 w-4 mr-2" />
                   Photos
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBlogPostEvent({ id: event.id, title: event.title })}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Write Blog
                 </Button>
 
                 <Button

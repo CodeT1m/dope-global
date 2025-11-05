@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, Award } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Star, Award, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PhotoWithDetails {
@@ -15,8 +16,20 @@ interface PhotoWithDetails {
   is_starred: boolean;
 }
 
+interface BlogPostWithDetails {
+  id: string;
+  title: string;
+  content: string;
+  cover_photo_url?: string;
+  category?: string;
+  photographer_name: string;
+  created_at: string;
+  tag_timi: boolean;
+}
+
 const FeedTab = () => {
   const [photos, setPhotos] = useState<PhotoWithDetails[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPostWithDetails[]>([]);
   const [photoOfTheDay, setPhotoOfTheDay] = useState<PhotoWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -83,8 +96,59 @@ const FeedTab = () => {
     setLoading(false);
   };
 
+  const fetchBlogPosts = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Fetch followed photographers
+    const { data: following } = await supabase
+      .from("photographer_followers")
+      .select("photographer_id")
+      .eq("follower_id", user.id);
+
+    const photographerIds = following?.map(f => f.photographer_id) || [];
+
+    // Fetch blog posts from followed photographers
+    const { data: posts, error } = await supabase
+      .from("blog_posts")
+      .select(`
+        id,
+        title,
+        content,
+        category,
+        created_at,
+        tag_timi,
+        cover_photo_id,
+        photographer_id,
+        profiles!blog_posts_photographer_id_fkey(full_name),
+        photos(file_url)
+      `)
+      .in("photographer_id", photographerIds)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error("Error fetching blog posts:", error);
+      return;
+    }
+
+    const postsWithDetails = posts?.map(post => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      category: post.category,
+      photographer_name: (post.profiles as any)?.full_name || "Unknown",
+      created_at: post.created_at,
+      cover_photo_url: (post.photos as any)?.file_url,
+      tag_timi: post.tag_timi,
+    })) || [];
+
+    setBlogPosts(postsWithDetails);
+  };
+
   useEffect(() => {
     fetchFeed();
+    fetchBlogPosts();
   }, []);
 
   const toggleStar = async (photoId: string) => {
@@ -113,18 +177,29 @@ const FeedTab = () => {
     return <div className="text-center py-8">Loading feed...</div>;
   }
 
-  if (photos.length === 0) {
+  const handleShareToLinkedIn = (post: BlogPostWithDetails) => {
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
+    window.open(linkedInUrl, '_blank');
+  };
+
+  if (photos.length === 0 && blogPosts.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">
-          Follow photographers to see their photos in your feed
+          Follow photographers to see their content in your feed
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <Tabs defaultValue="media" className="space-y-6">
+      <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsTrigger value="media">Media</TabsTrigger>
+        <TabsTrigger value="blog">Blog</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="media" className="space-y-8">
       {/* Photo of the Day */}
       {photoOfTheDay && (
         <Card className="overflow-hidden bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 border-2 border-yellow-400">
@@ -188,7 +263,67 @@ const FeedTab = () => {
           </Card>
         ))}
       </div>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="blog" className="space-y-6">
+        {blogPosts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              No blog posts yet. Follow photographers to see their stories!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {blogPosts.map((post) => (
+              <Card key={post.id} className="overflow-hidden">
+                {post.cover_photo_url && (
+                  <img
+                    src={post.cover_photo_url}
+                    alt={post.title}
+                    className="w-full h-64 object-cover"
+                  />
+                )}
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      {post.category && (
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                          {post.category}
+                        </span>
+                      )}
+                      <h3 className="text-2xl font-bold mt-1">{post.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        By {post.photographer_name} • {new Date(post.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="prose prose-sm max-w-none mb-4">
+                    <p className="whitespace-pre-wrap">{post.content}</p>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center gap-2">
+                      {post.tag_timi && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                          Tagged for repost
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleShareToLinkedIn(post)}
+                    >
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share on LinkedIn
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </TabsContent>
+    </Tabs>
   );
 };
 
