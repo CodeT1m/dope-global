@@ -54,11 +54,6 @@ const HomepageManagementTab = () => {
   };
 
   const handleAddSection = async () => {
-    if (!newSection.logo_url || !newSection.link_url || !newSection.alt_text) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
     const maxOrder = sections
       .filter(s => s.section_name === newSection.section_name)
       .reduce((max, s) => Math.max(max, s.display_order), -1);
