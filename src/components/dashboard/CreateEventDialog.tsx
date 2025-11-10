@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +23,8 @@ interface CreateEventDialogProps {
 const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [communities, setCommunities] = useState<string[]>([]);
+  const [newCommunity, setNewCommunity] = useState("");
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -38,6 +40,62 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
     organizerLink: "",
     hashtags: "",
   });
+
+  useEffect(() => {
+    if (open) {
+      fetchCommunities();
+    }
+  }, [open]);
+
+  const fetchCommunities = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("photographer_communities")
+      .select("community_name")
+      .eq("photographer_id", user.id);
+
+    if (data) {
+      setCommunities(data.map(c => c.community_name));
+    }
+  };
+
+  const handleAddCommunity = async () => {
+    if (!newCommunity.trim()) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("photographer_communities")
+      .insert({
+        photographer_id: user.id,
+        community_name: newCommunity.trim(),
+      });
+
+    if (!error) {
+      setCommunities([...communities, newCommunity.trim()]);
+      setNewCommunity("");
+      toast({ title: "Community added" });
+    }
+  };
+
+  const handleRemoveCommunity = async (community: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("photographer_communities")
+      .delete()
+      .eq("photographer_id", user.id)
+      .eq("community_name", community);
+
+    if (!error) {
+      setCommunities(communities.filter(c => c !== community));
+      toast({ title: "Community removed" });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,7 +239,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow">
+        <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="h-5 w-5 mr-2" />
           Create Event
         </Button>
@@ -229,12 +287,50 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="organizerName">Community / Organizer</Label>
-            <Input
-              id="organizerName"
-              value={formData.organizerName}
-              onChange={(e) => setFormData({ ...formData, organizerName: e.target.value })}
-              placeholder="AI Tinkerers KL"
-            />
+            <div className="flex gap-2">
+              <select
+                id="organizerName"
+                value={formData.organizerName}
+                onChange={(e) => setFormData({ ...formData, organizerName: e.target.value })}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="">Select or type new...</option>
+                {communities.map((community) => (
+                  <option key={community} value={community}>
+                    {community}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add new community..."
+                value={newCommunity}
+                onChange={(e) => setNewCommunity(e.target.value)}
+              />
+              <Button type="button" onClick={handleAddCommunity} variant="outline" size="sm">
+                Add
+              </Button>
+            </div>
+            {communities.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {communities.map((community) => (
+                  <div
+                    key={community}
+                    className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded text-sm"
+                  >
+                    <span>{community}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCommunity(community)}
+                      className="hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

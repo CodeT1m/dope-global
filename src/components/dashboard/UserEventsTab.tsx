@@ -398,7 +398,7 @@ const UserEventsTab = () => {
                         handleRemovalRequest(photo.id);
                       }}
                     >
-                      <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                      <AlertCircle className="h-4 w-4 text-muted-foreground/60" />
                     </Button>
                   </div>
                   <img

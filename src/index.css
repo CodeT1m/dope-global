@@ -143,13 +143,16 @@ All colors MUST be HSL.
   }
 }
 
+
 @layer utilities {
   .gradient-primary {
-    background: var(--gradient-primary);
+    background: hsl(var(--primary));
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
   }
 
   .gradient-accent {
-    background: var(--gradient-accent);
+    background: hsl(var(--accent));
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.3);
   }
 
   .gradient-hero {

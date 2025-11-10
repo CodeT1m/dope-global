@@ -7,12 +7,7 @@ import heroDark from "@/assets/hero-dark.jpg";
 import heroLight from "@/assets/hero-light.jpg";
 import logoDark from "@/assets/logo-dark.png";
 import logoLight from "@/assets/logo-light.png";
-import lovableLogo from "@/assets/partners/lovable.png";
-import aiTinkerersLogo from "@/assets/community/ai-tinkerers.png";
-import buildersClubLogo from "@/assets/community/builders-club.png";
-import loopholeHackersLogo from "@/assets/community/loophole-hackers.png";
-import fofKlLogo from "@/assets/community/fof-kl.png";
-import summyLogo from "@/assets/community/summy.png";
+import { ResourcesSection, CommunitySection } from "@/components/homepage/HomepageSections";
 
 const Index = () => {
   const { theme } = useTheme();
@@ -38,10 +33,7 @@ const Index = () => {
         {/* Header - positioned absolute over hero */}
         <header className="absolute top-0 left-0 right-0 z-20 container mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="DOPE Logo" className="h-12 w-auto" />
-            <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              DOPE
-            </span>
+            <img src={logo} alt="DOPE Logo" className="h-16 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -61,15 +53,15 @@ const Index = () => {
               <img 
                 src={logo} 
                 alt="DOPE Logo" 
-                className="h-24 w-auto animate-glow-pulse"
+                className="h-32 w-auto animate-glow-pulse"
               />
             </div>
 
             {/* Headline */}
             <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-              <span className="text-gradient">Diary of a</span>
+              <span className="text-gradient">Diary of</span>
               <br />
-              <span className="text-gradient-accent">Photographer Experience</span>
+              <span className="text-gradient-accent">Photographers</span>
             </h1>
 
             {/* Subheadline */}
@@ -111,48 +103,7 @@ const Index = () => {
       </section>
 
       {/* Partners Section */}
-      <section className="py-16 px-4 bg-muted/20">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-gradient">Resources</span>
-            </h2>
-          </div>
-          <div className="overflow-hidden">
-            <div className="flex animate-scroll-horizontal gap-12 items-center">
-              <a 
-                href="https://lovable.dev/invite/QIBH2NG" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex-shrink-0 hover-scale"
-              >
-                <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow transition-all">
-                  <img 
-                    src={lovableLogo} 
-                    alt="Lovable" 
-                    className="h-16 w-auto filter brightness-90 hover:brightness-110 transition-all"
-                  />
-                </div>
-              </a>
-              {/* Duplicate for seamless loop */}
-              <a 
-                href="https://lovable.dev/invite/QIBH2NG" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex-shrink-0 hover-scale"
-              >
-                <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow transition-all">
-                  <img 
-                    src={lovableLogo} 
-                    alt="Lovable" 
-                    className="h-16 w-auto filter brightness-90 hover:brightness-110 transition-all"
-                  />
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ResourcesSection />
 
       {/* Features Section */}
       <section className="py-24 px-4">
@@ -233,177 +184,28 @@ const Index = () => {
       <footer className="py-12 px-4 border-t border-border">
         <div className="container mx-auto">
           {/* Community Logos Section */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-center mb-8">
-              <span className="text-gradient">Community</span>
-            </h3>
-            <div className="overflow-hidden">
-              <div className="flex animate-scroll-horizontal gap-8 items-center">
-                <a 
-                  href="https://www.linkedin.com/company/ai-tinkerers-kuala-lumpur/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={aiTinkerersLogo} 
-                      alt="AI Tinkerers KL" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                <a 
-                  href="https://www.linkedin.com/company/the-builders-club-ai/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={buildersClubLogo} 
-                      alt="The Builders Club AI" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                <a 
-                  href="https://www.instagram.com/loopholehackers/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={loopholeHackersLogo} 
-                      alt="Loophole Hackers" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                <a 
-                  href="https://www.instagram.com/fof_kualalumpur/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={fofKlLogo} 
-                      alt="FOF Kuala Lumpur" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                <a 
-                  href="https://summysvc.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={summyLogo} 
-                      alt="Summy" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                {/* Duplicate for seamless loop */}
-                <a 
-                  href="https://www.linkedin.com/company/ai-tinkerers-kuala-lumpur/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={aiTinkerersLogo} 
-                      alt="AI Tinkerers KL" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                <a 
-                  href="https://www.linkedin.com/company/the-builders-club-ai/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={buildersClubLogo} 
-                      alt="The Builders Club AI" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                <a 
-                  href="https://www.instagram.com/loopholehackers/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={loopholeHackersLogo} 
-                      alt="Loophole Hackers" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                <a 
-                  href="https://www.instagram.com/fof_kualalumpur/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={fofKlLogo} 
-                      alt="FOF Kuala Lumpur" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-                <a 
-                  href="https://summysvc.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 group"
-                >
-                  <div className="w-32 h-32 gradient-card rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                    <img 
-                      src={summyLogo} 
-                      alt="Summy" 
-                      className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                </a>
-              </div>
-            </div>
-          </div>
+          <CommunitySection />
 
           {/* Footer Bottom */}
           <div className="text-center space-y-6 border-t border-border pt-8">
             <div className="flex justify-center mb-4">
-              <img src={logo} alt="DOPE" className="h-12 w-auto opacity-80" />
+              <img src={logo} alt="DOPE" className="h-16 w-auto opacity-80" />
             </div>
             <p className="text-muted-foreground">
               Powered by DOPE • timinottimid
             </p>
             
             {/* Connect with DOPE founder */}
-            <div className="space-y-3">
-              <p className="text-lg font-semibold text-gradient animate-fade-in">
-                Connect with DOPE Founder
+            <div className="space-y-4">
+              <p className="text-xl font-bold text-gradient animate-fade-in animate-pulse">
+                ✨ Connect with DOPE Founder ✨
               </p>
-              <div className="flex justify-center gap-6 text-sm">
+              <div className="flex justify-center gap-6 text-base">
                 <a 
                   href="https://instagram.com/timi.jpeng" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform animate-fade-in"
+                  className="text-muted-foreground hover:text-primary transition-all hover:scale-125 transform animate-fade-in hover:shadow-glow"
                   style={{ animationDelay: "0.1s" }}
                 >
                   Instagram
@@ -412,7 +214,7 @@ const Index = () => {
                   href="https://linkedin.com/in/ileladewa-oluwatimilehin" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform animate-fade-in"
+                  className="text-muted-foreground hover:text-primary transition-all hover:scale-125 transform animate-fade-in hover:shadow-glow"
                   style={{ animationDelay: "0.2s" }}
                 >
                   LinkedIn
@@ -421,7 +223,7 @@ const Index = () => {
                   href="https://behance.net/timinottimid" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform animate-fade-in"
+                  className="text-muted-foreground hover:text-primary transition-all hover:scale-125 transform animate-fade-in hover:shadow-glow"
                   style={{ animationDelay: "0.3s" }}
                 >
                   Behance
@@ -430,7 +232,7 @@ const Index = () => {
                   href="https://x.com/timinottimid" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform animate-fade-in"
+                  className="text-muted-foreground hover:text-primary transition-all hover:scale-125 transform animate-fade-in hover:shadow-glow"
                   style={{ animationDelay: "0.4s" }}
                 >
                   X (Twitter)

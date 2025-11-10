@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Crown, Users, Camera, Image, LogOut, BarChart3, UserCircle } from "lucide-react";
+import { Crown, Users, Camera, Image, LogOut, BarChart3, UserCircle, Globe } from "lucide-react";
 import dopeLogo from "@/assets/dope-logo.png";
 import ProfileTab from "./ProfileTab";
+import HomepageManagementTab from "./HomepageManagementTab";
 
 interface SuperadminDashboardProps {
   user: User;
@@ -85,7 +86,7 @@ const SuperadminDashboard = ({ user }: SuperadminDashboardProps) => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3">
+          <TabsList className="grid w-full max-w-3xl grid-cols-4">
             <TabsTrigger value="overview">
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
@@ -93,6 +94,10 @@ const SuperadminDashboard = ({ user }: SuperadminDashboardProps) => {
             <TabsTrigger value="management">
               <Crown className="h-4 w-4 mr-2" />
               Management
+            </TabsTrigger>
+            <TabsTrigger value="homepage">
+              <Globe className="h-4 w-4 mr-2" />
+              Homepage
             </TabsTrigger>
             <TabsTrigger value="profile">
               <UserCircle className="h-4 w-4 mr-2" />
@@ -174,6 +179,10 @@ const SuperadminDashboard = ({ user }: SuperadminDashboardProps) => {
                 meme moderation, and platform configuration is under development.
               </p>
             </div>
+          </TabsContent>
+
+          <TabsContent value="homepage">
+            <HomepageManagementTab />
           </TabsContent>
 
           <TabsContent value="profile">

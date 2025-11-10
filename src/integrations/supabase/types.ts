@@ -151,6 +151,45 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_sections: {
+        Row: {
+          alt_text: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          link_url: string
+          logo_url: string
+          section_name: string
+          updated_at: string
+          use_background: boolean
+        }
+        Insert: {
+          alt_text: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          link_url: string
+          logo_url: string
+          section_name: string
+          updated_at?: string
+          use_background?: boolean
+        }
+        Update: {
+          alt_text?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          link_url?: string
+          logo_url?: string
+          section_name?: string
+          updated_at?: string
+          use_background?: boolean
+        }
+        Relationships: []
+      }
       memes: {
         Row: {
           approved_by: string | null
@@ -309,6 +348,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      photographer_communities: {
+        Row: {
+          community_name: string
+          created_at: string
+          id: string
+          photographer_id: string
+        }
+        Insert: {
+          community_name: string
+          created_at?: string
+          id?: string
+          photographer_id: string
+        }
+        Update: {
+          community_name?: string
+          created_at?: string
+          id?: string
+          photographer_id?: string
+        }
+        Relationships: []
       }
       photographer_followers: {
         Row: {
