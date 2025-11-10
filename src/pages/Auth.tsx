@@ -5,10 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/components/ThemeProvider";
 import { Loader2 } from "lucide-react";
-import dopeLogo from "@/assets/dope-logo.png";
+import authLogoDark from "@/assets/auth-logo-dark.png";
+import authLogoLight from "@/assets/auth-logo-light.png";
 
 const Auth = () => {
+  const { theme } = useTheme();
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const logo = currentTheme === "dark" ? authLogoDark : authLogoLight;
+  
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -128,7 +135,7 @@ const Auth = () => {
         <div className="gradient-card p-8 rounded-2xl shadow-elevated">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <img src={dopeLogo} alt="DOPE Logo" className="h-16 w-auto" />
+            <img src={logo} alt="DOPE Logo" className="h-16 w-auto" />
           </div>
 
           {/* Title */}
@@ -226,7 +233,7 @@ const Auth = () => {
 
             <Button
               type="submit"
-              className="w-full gradient-primary shadow-glow"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow"
               disabled={loading}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

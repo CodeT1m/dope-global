@@ -391,14 +391,14 @@ const UserEventsTab = () => {
                     </Button>
                     <Button
                       size="icon"
-                      variant="destructive"
-                      className="h-8 w-8 shadow-lg"
+                      variant="ghost"
+                      className="h-8 w-8 shadow-lg hover:bg-muted/80"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleRemovalRequest(photo.id);
                       }}
                     >
-                      <AlertCircle className="h-4 w-4" />
+                      <AlertCircle className="h-4 w-4 text-muted-foreground" />
                     </Button>
                   </div>
                   <img

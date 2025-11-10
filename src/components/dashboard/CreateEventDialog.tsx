@@ -41,6 +41,26 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate all required fields
+    if (!formData.title || !formData.eventDate || !formData.location) {
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedFiles.length === 0) {
+      toast({
+        title: "Photos required",
+        description: "Please upload at least one photo for this event",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -80,15 +100,13 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
         console.error('QR generation error:', qrError);
       }
 
-      // Upload photos if any selected
-      if (selectedFiles.length > 0) {
-        setUploadingPhotos(true);
-        await uploadPhotos(event.id, user.id);
-      }
+      // Upload photos
+      setUploadingPhotos(true);
+      await uploadPhotos(event.id, user.id);
 
       toast({
         title: "Success!",
-        description: `Event created${selectedFiles.length > 0 ? ' with photos' : ''}`,
+        description: "Event created with photos",
       });
 
       setOpen(false);
@@ -163,7 +181,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg" className="gradient-primary shadow-glow">
+        <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow">
           <Plus className="h-5 w-5 mr-2" />
           Create Event
         </Button>
@@ -172,7 +190,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
         <DialogHeader>
           <DialogTitle>Create New Event</DialogTitle>
           <DialogDescription>
-            Fill in the details below to create your event gallery
+            Fill in all the details below to create your event gallery
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -210,7 +228,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="organizerName">Organizer Name</Label>
+            <Label htmlFor="organizerName">Community / Organizer</Label>
             <Input
               id="organizerName"
               value={formData.organizerName}
@@ -252,7 +270,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="photos">Upload Photos (Optional)</Label>
+            <Label htmlFor="photos">Upload Photos *</Label>
             <div className="flex items-center gap-3">
               <label htmlFor="photos">
                 <Button type="button" variant="outline" asChild>
@@ -275,6 +293,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
               multiple
               className="hidden"
               onChange={handleFileSelect}
+              required
             />
           </div>
 
@@ -292,7 +311,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || uploadingPhotos} className="gradient-primary">
+            <Button type="submit" disabled={loading || uploadingPhotos} className="bg-primary text-primary-foreground hover:bg-primary/90">
               {(loading || uploadingPhotos) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {uploadingPhotos ? "Uploading Photos..." : "Create Event"}
             </Button>

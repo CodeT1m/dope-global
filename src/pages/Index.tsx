@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Camera, Sparkles, Users, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroBg from "@/assets/hero-bg.jpg";
-import dopeLogo from "@/assets/dope-logo.png";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/components/ThemeProvider";
+import heroDark from "@/assets/hero-dark.jpg";
+import heroLight from "@/assets/hero-light.jpg";
+import logoDark from "@/assets/logo-dark.png";
+import logoLight from "@/assets/logo-light.png";
 import lovableLogo from "@/assets/partners/lovable.png";
 import aiTinkerersLogo from "@/assets/community/ai-tinkerers.png";
 import buildersClubLogo from "@/assets/community/builders-club.png";
@@ -11,6 +15,12 @@ import fofKlLogo from "@/assets/community/fof-kl.png";
 import summyLogo from "@/assets/community/summy.png";
 
 const Index = () => {
+  const { theme } = useTheme();
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const heroBg = currentTheme === "dark" ? heroDark : heroLight;
+  const logo = currentTheme === "dark" ? logoDark : logoLight;
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -28,16 +38,19 @@ const Index = () => {
         {/* Header - positioned absolute over hero */}
         <header className="absolute top-0 left-0 right-0 z-20 container mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={dopeLogo} alt="DOPE Logo" className="h-12 w-auto" />
+            <img src={logo} alt="DOPE Logo" className="h-12 w-auto" />
             <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               DOPE
             </span>
           </div>
-          <Link to="/auth">
-            <Button variant="outline" className="shadow-elevated backdrop-blur-sm">
-              Login
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link to="/auth">
+              <Button variant="outline" className="shadow-elevated backdrop-blur-sm">
+                Login
+              </Button>
+            </Link>
+          </div>
         </header>
 
         {/* Content */}
@@ -46,7 +59,7 @@ const Index = () => {
             {/* Logo */}
             <div className="flex justify-center mb-8">
               <img 
-                src={dopeLogo} 
+                src={logo} 
                 alt="DOPE Logo" 
                 className="h-24 w-auto animate-glow-pulse"
               />
@@ -69,7 +82,7 @@ const Index = () => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
               <Link to="/auth">
-                <Button size="lg" className="gradient-primary text-lg px-8 py-6 shadow-glow hover:shadow-glow-accent transition-all">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-6 shadow-glow hover:shadow-glow-accent transition-all">
                   Get Started Free
                   <Sparkles className="ml-2 h-5 w-5" />
                 </Button>
@@ -156,7 +169,7 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Feature 1 */}
             <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow transition-all animate-scale-in">
-              <div className="w-14 h-14 gradient-primary rounded-xl flex items-center justify-center mb-6 shadow-glow">
+              <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-6 shadow-glow">
                 <Zap className="h-7 w-7 text-primary-foreground" />
               </div>
               <h3 className="text-2xl font-bold mb-4">AI Photo Discovery</h3>
@@ -168,7 +181,7 @@ const Index = () => {
 
             {/* Feature 2 */}
             <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow-accent transition-all animate-scale-in" style={{ animationDelay: "0.1s" }}>
-              <div className="w-14 h-14 gradient-accent rounded-xl flex items-center justify-center mb-6 shadow-glow-accent">
+              <div className="w-14 h-14 bg-accent rounded-xl flex items-center justify-center mb-6 shadow-glow-accent">
                 <Sparkles className="h-7 w-7 text-accent-foreground" />
               </div>
               <h3 className="text-2xl font-bold mb-4">Viral Engagement</h3>
@@ -180,7 +193,7 @@ const Index = () => {
 
             {/* Feature 3 */}
             <div className="gradient-card p-8 rounded-2xl shadow-elevated hover:shadow-glow transition-all animate-scale-in" style={{ animationDelay: "0.2s" }}>
-              <div className="w-14 h-14 gradient-primary rounded-xl flex items-center justify-center mb-6 shadow-glow">
+              <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center mb-6 shadow-glow">
                 <Users className="h-7 w-7 text-primary-foreground" />
               </div>
               <h3 className="text-2xl font-bold mb-4">Community Hub</h3>
@@ -207,7 +220,7 @@ const Index = () => {
             </p>
             <div className="pt-4">
               <Link to="/auth">
-                <Button size="lg" className="gradient-accent px-8 py-6 text-lg shadow-glow-accent">
+                <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 px-8 py-6 text-lg shadow-glow-accent">
                   Start Your Studio
                 </Button>
               </Link>
@@ -372,53 +385,64 @@ const Index = () => {
           </div>
 
           {/* Footer Bottom */}
-          <div className="text-center space-y-4 border-t border-border pt-8">
+          <div className="text-center space-y-6 border-t border-border pt-8">
             <div className="flex justify-center mb-4">
-              <img src={dopeLogo} alt="DOPE" className="h-12 w-auto opacity-80" />
+              <img src={logo} alt="DOPE" className="h-12 w-auto opacity-80" />
             </div>
             <p className="text-muted-foreground">
               Powered by DOPE • timinottimid
             </p>
-            <div className="flex justify-center gap-6 text-sm">
-              <a 
-                href="https://instagram.com/timi.jpeng" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                Instagram
-              </a>
-              <a 
-                href="https://linkedin.com/in/ileladewa-oluwatimilehin" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                LinkedIn
-              </a>
-              <a 
-                href="https://behance.net/timinottimid" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                Behance
-              </a>
-              <a 
-                href="https://x.com/timinottimid" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                X (Twitter)
-              </a>
+            
+            {/* Connect with DOPE founder */}
+            <div className="space-y-3">
+              <p className="text-lg font-semibold text-gradient animate-fade-in">
+                Connect with DOPE Founder
+              </p>
+              <div className="flex justify-center gap-6 text-sm">
+                <a 
+                  href="https://instagram.com/timi.jpeng" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform animate-fade-in"
+                  style={{ animationDelay: "0.1s" }}
+                >
+                  Instagram
+                </a>
+                <a 
+                  href="https://linkedin.com/in/ileladewa-oluwatimilehin" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform animate-fade-in"
+                  style={{ animationDelay: "0.2s" }}
+                >
+                  LinkedIn
+                </a>
+                <a 
+                  href="https://behance.net/timinottimid" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform animate-fade-in"
+                  style={{ animationDelay: "0.3s" }}
+                >
+                  Behance
+                </a>
+                <a 
+                  href="https://x.com/timinottimid" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform animate-fade-in"
+                  style={{ animationDelay: "0.4s" }}
+                >
+                  X (Twitter)
+                </a>
+              </div>
+                <p className="text-xs text-muted-foreground pt-4">
+                  © 2025 DOPE. All rights reserved.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground pt-4">
-              © 2025 DOPE. All rights reserved.
-            </p>
           </div>
-        </div>
-      </footer>
+        </footer>
     </div>
   );
 };
