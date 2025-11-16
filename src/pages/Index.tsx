@@ -5,8 +5,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
 import heroDark from "@/assets/hero-dark.jpg";
 import heroLight from "@/assets/hero-light.jpg";
-import logoDark from "@/assets/logo-dark.png";
-import logoLight from "@/assets/logo-light.png";
+import logoDark from "@/assets/logo-dark.svg";
+import logoLight from "@/assets/logo-light.svg";
 import { ResourcesSection, CommunitySection } from "@/components/homepage/HomepageSections";
 
 const Index = () => {
@@ -73,7 +73,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
               <Link to="/auth">
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-6 shadow-glow hover:shadow-glow-accent transition-all">
-                  Get Started Free
+                  Get Your Photos
                   <Sparkles className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
