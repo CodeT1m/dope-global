@@ -6,15 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader2 } from "lucide-react";
-import authLogoDark from "@/assets/auth-logo-dark.png";
-import authLogoLight from "@/assets/auth-logo-light.png";
+import logoDark from "@/assets/logo-dark.png";
+import logoLight from "@/assets/logo-light.png";
 
 const Auth = () => {
   const { theme } = useTheme();
   const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   const currentTheme = theme === "system" ? systemTheme : theme;
-  const logo = currentTheme === "dark" ? authLogoDark : authLogoLight;
+  const logo = currentTheme === "dark" ? logoDark : logoLight;
   
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -131,11 +132,16 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6">
+        <ThemeToggle />
+      </div>
+      
       <div className="w-full max-w-md">
         <div className="gradient-card p-8 rounded-2xl shadow-elevated">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <img src={logo} alt="DOPE Logo" className="h-16 w-auto" />
+            <img src={logo} alt="DOPE Logo" className="h-24 w-auto" />
           </div>
 
           {/* Title */}
