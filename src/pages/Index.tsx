@@ -33,7 +33,7 @@ const Index = () => {
         {/* Header - positioned absolute over hero */}
         <header className="absolute top-0 left-0 right-0 z-20 container mx-auto px-4 py-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-            <img src={logo} alt="DOPE Logo" className="h-32 w-auto drop-shadow-2xl" style={{ filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.3))' }} />
+            <img src={logo} alt="DOPE Logo" className="h-32 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -53,8 +53,7 @@ const Index = () => {
               <img 
                 src={logo} 
                 alt="DOPE Logo" 
-                className="h-48 w-auto animate-glow-pulse drop-shadow-2xl"
-                style={{ filter: 'drop-shadow(0 0 30px rgba(255, 255, 255, 0.4))' }}
+                className="h-48 w-auto animate-glow-pulse"
               />
             </div>
 
