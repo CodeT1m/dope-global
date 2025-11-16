@@ -32,8 +32,8 @@ const Index = () => {
 
         {/* Header - positioned absolute over hero */}
         <header className="absolute top-0 left-0 right-0 z-20 container mx-auto px-4 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="DOPE Logo" className="h-16 w-auto" />
+            <div className="flex items-center gap-3">
+            <img src={logo} alt="DOPE Logo" className="h-20 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -59,9 +59,9 @@ const Index = () => {
 
             {/* Headline */}
             <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-              <span className="text-gradient">Diary of</span>
+              <span className="text-primary">Diary of</span>
               <br />
-              <span className="text-gradient-accent">Photographers</span>
+              <span className="text-accent">Photographers</span>
             </h1>
 
             {/* Subheadline */}
@@ -110,7 +110,7 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="text-center mb-16 animate-fade-in">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="text-gradient">Why DOPE?</span>
+              <span className="text-primary">Why DOPE?</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Transform event photography into interactive experiences
@@ -163,7 +163,7 @@ const Index = () => {
           <div className="gradient-card p-12 rounded-3xl shadow-elevated text-center space-y-6">
             <Camera className="h-16 w-16 mx-auto text-primary animate-float" />
             <h2 className="text-4xl font-bold">
-              <span className="text-gradient">For Photographers</span>
+              <span className="text-primary">For Photographers</span>
             </h2>
             <p className="text-xl text-muted-foreground">
               Create your branded event galleries, engage your audience with 
@@ -197,7 +197,7 @@ const Index = () => {
             
             {/* Connect with DOPE founder */}
             <div className="space-y-4">
-              <p className="text-xl font-bold text-gradient animate-fade-in animate-pulse">
+              <p className="text-xl font-bold text-primary animate-fade-in animate-pulse">
                 ✨ Connect with DOPE Founder ✨
               </p>
               <div className="flex justify-center gap-6 text-base">

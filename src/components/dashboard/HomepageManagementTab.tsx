@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, Edit2, Save, X } from "lucide-react";
 
 interface HomepageSection {
   id: string;
@@ -23,6 +23,8 @@ interface HomepageSection {
 const HomepageManagementTab = () => {
   const [sections, setSections] = useState<HomepageSection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<HomepageSection>>({});
   const [newSection, setNewSection] = useState({
     section_name: "community",
     logo_url: "",
@@ -126,13 +128,134 @@ const HomepageManagementTab = () => {
     }
   };
 
+  const startEditing = (section: HomepageSection) => {
+    setEditingId(section.id);
+    setEditForm({
+      logo_url: section.logo_url,
+      link_url: section.link_url,
+      alt_text: section.alt_text,
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditForm({});
+  };
+
+  const saveEdit = async (id: string) => {
+    const { error } = await supabase
+      .from("homepage_sections")
+      .update(editForm)
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to update section");
+      console.error(error);
+    } else {
+      toast.success("Section updated successfully");
+      setEditingId(null);
+      setEditForm({});
+      fetchSections();
+    }
+  };
+
   const resourcesSections = sections.filter(s => s.section_name === "resources");
   const communitySections = sections.filter(s => s.section_name === "community");
+
+  const renderSectionCard = (section: HomepageSection) => (
+    <Card key={section.id} className="p-4">
+      {editingId === section.id ? (
+        <div className="space-y-4">
+          <div>
+            <Label>Logo URL</Label>
+            <Input
+              value={editForm.logo_url || ""}
+              onChange={(e) => setEditForm({ ...editForm, logo_url: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label>Link URL</Label>
+            <Input
+              value={editForm.link_url || ""}
+              onChange={(e) => setEditForm({ ...editForm, link_url: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label>Alt Text</Label>
+            <Input
+              value={editForm.alt_text || ""}
+              onChange={(e) => setEditForm({ ...editForm, alt_text: e.target.value })}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={() => saveEdit(section.id)} size="sm" className="flex-1">
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+            <Button onClick={cancelEditing} variant="outline" size="sm" className="flex-1">
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h4 className="font-semibold">{section.alt_text}</h4>
+              <p className="text-sm text-muted-foreground truncate">{section.link_url}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => startEditing(section)}
+              >
+                <Edit2 className="h-4 w-4 text-primary" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDeleteSection(section.id)}
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className={section.use_background ? "gradient-card p-4 rounded-lg" : "p-4"}>
+              <img 
+                src={section.logo_url} 
+                alt={section.alt_text}
+                className="h-12 w-auto mx-auto"
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <Label className="text-xs">Active</Label>
+              <Switch
+                checked={section.is_active}
+                onCheckedChange={() => handleToggleActive(section.id, section.is_active)}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="text-xs">Background</Label>
+              <Switch
+                checked={section.use_background}
+                onCheckedChange={() => handleToggleBackground(section.id, section.use_background)}
+              />
+            </div>
+          </div>
+        </>
+      )}
+    </Card>
+  );
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold mb-4 text-gradient">Manage Homepage Sections</h2>
+        <h2 className="text-2xl font-bold mb-4 text-primary">Manage Homepage Sections</h2>
         <p className="text-muted-foreground">
           Add and manage logos for the Resources and Community sections on the homepage
         </p>
@@ -251,48 +374,7 @@ const HomepageManagementTab = () => {
           <p className="text-muted-foreground">No resources added yet</p>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
-            {resourcesSections.map((section) => (
-              <Card key={section.id} className="p-4">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h4 className="font-semibold">{section.alt_text}</h4>
-                    <p className="text-sm text-muted-foreground truncate">{section.link_url}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteSection(section.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-                <div className="mb-4">
-                  <div className={section.use_background ? "gradient-card p-4 rounded-lg" : "p-4"}>
-                    <img 
-                      src={section.logo_url} 
-                      alt={section.alt_text}
-                      className="h-12 w-auto mx-auto"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs">Active</Label>
-                    <Switch
-                      checked={section.is_active}
-                      onCheckedChange={() => handleToggleActive(section.id, section.is_active)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs">Background</Label>
-                    <Switch
-                      checked={section.use_background}
-                      onCheckedChange={() => handleToggleBackground(section.id, section.use_background)}
-                    />
-                  </div>
-                </div>
-              </Card>
-            ))}
+            {resourcesSections.map(renderSectionCard)}
           </div>
         )}
       </div>
@@ -306,48 +388,7 @@ const HomepageManagementTab = () => {
           <p className="text-muted-foreground">No community logos added yet</p>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
-            {communitySections.map((section) => (
-              <Card key={section.id} className="p-4">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h4 className="font-semibold">{section.alt_text}</h4>
-                    <p className="text-sm text-muted-foreground truncate">{section.link_url}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteSection(section.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-                <div className="mb-4">
-                  <div className={section.use_background ? "w-32 h-32 gradient-card rounded-xl p-4 mx-auto" : "w-32 h-32 p-4 mx-auto"}>
-                    <img 
-                      src={section.logo_url} 
-                      alt={section.alt_text}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs">Active</Label>
-                    <Switch
-                      checked={section.is_active}
-                      onCheckedChange={() => handleToggleActive(section.id, section.is_active)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs">Background</Label>
-                    <Switch
-                      checked={section.use_background}
-                      onCheckedChange={() => handleToggleBackground(section.id, section.use_background)}
-                    />
-                  </div>
-                </div>
-              </Card>
-            ))}
+            {communitySections.map(renderSectionCard)}
           </div>
         )}
       </div>

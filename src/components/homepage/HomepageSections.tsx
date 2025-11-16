@@ -39,7 +39,7 @@ export const ResourcesSection = () => {
       <div className="container mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="text-gradient">Resources</span>
+            <span className="text-primary">Resources</span>
           </h2>
         </div>
         <div className="overflow-hidden">
@@ -58,14 +58,14 @@ export const ResourcesSection = () => {
                     <img
                       src={section.logo_url}
                       alt={section.alt_text}
-                      className="h-20 w-auto filter brightness-90 hover:brightness-110 transition-all"
+                      className="h-32 w-auto filter brightness-90 hover:brightness-110 transition-all"
                     />
                   </div>
                 ) : (
                   <img
                     src={section.logo_url}
                     alt={section.alt_text}
-                    className="h-20 w-auto filter brightness-90 hover:brightness-110 transition-all"
+                    className="h-32 w-auto filter brightness-90 hover:brightness-110 transition-all"
                   />
                 )}
               </a>
@@ -102,7 +102,7 @@ export const CommunitySection = () => {
   return (
     <div className="mb-12">
       <h3 className="text-2xl font-bold text-center mb-8">
-        <span className="text-gradient">Community</span>
+        <span className="text-primary">Community</span>
       </h3>
       <div className="overflow-hidden">
         <div className="flex animate-scroll-horizontal gap-8 items-center">
@@ -116,7 +116,7 @@ export const CommunitySection = () => {
               className="flex-shrink-0 group"
             >
               {section.use_background ? (
-                <div className="w-32 h-32 bg-card border border-border rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                <div className="w-40 h-40 bg-card border border-border rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
                   <img
                     src={section.logo_url}
                     alt={section.alt_text}
@@ -124,7 +124,7 @@ export const CommunitySection = () => {
                   />
                 </div>
               ) : (
-                <div className="w-32 h-32 flex items-center justify-center">
+                <div className="w-40 h-40 flex items-center justify-center">
                   <img
                     src={section.logo_url}
                     alt={section.alt_text}

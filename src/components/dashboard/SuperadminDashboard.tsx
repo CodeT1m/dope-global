@@ -5,7 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Crown, Users, Camera, Image, LogOut, BarChart3, UserCircle, Globe } from "lucide-react";
-import dopeLogo from "@/assets/dope-logo.png";
+import logoDark from "@/assets/logo-dark.png";
+import logoLight from "@/assets/logo-light.png";
+import { useTheme } from "@/components/ThemeProvider";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import ProfileTab from "./ProfileTab";
 import HomepageManagementTab from "./HomepageManagementTab";
 import ManagementTab from "./ManagementTab";
@@ -16,6 +19,10 @@ interface SuperadminDashboardProps {
 
 const SuperadminDashboard = ({ user }: SuperadminDashboardProps) => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const logo = currentTheme === "dark" ? logoDark : logoLight;
   const [activeTab, setActiveTab] = useState("overview");
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -62,16 +69,19 @@ const SuperadminDashboard = ({ user }: SuperadminDashboardProps) => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={dopeLogo} alt="DOPE" className="h-10 w-auto" />
+            <img src={logo} alt="DOPE" className="h-16 w-auto" />
             <div className="flex items-center gap-2">
               <Crown className="h-5 w-5 text-accent" />
               <span className="font-semibold">Superadmin Dashboard</span>
             </div>
           </div>
-          <Button onClick={handleSignOut} variant="outline" size="sm">
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Button onClick={handleSignOut} variant="outline" size="sm">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -79,7 +89,7 @@ const SuperadminDashboard = ({ user }: SuperadminDashboardProps) => {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">
-            <span className="text-gradient">Welcome, Superadmin</span>
+            <span className="text-primary">Welcome, Superadmin</span>
           </h1>
           <p className="text-muted-foreground">
             {user.email}
