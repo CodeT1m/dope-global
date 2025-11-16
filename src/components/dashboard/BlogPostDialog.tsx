@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Share2 } from "lucide-react";
+import { Loader2, Sparkles, Plus, X } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Photo {
   id: string;
@@ -23,13 +23,20 @@ interface BlogPostDialogProps {
   eventTitle: string;
 }
 
+interface Organizer {
+  name: string;
+  linkedInUrl: string;
+}
+
 const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDialogProps) => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string>("");
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [takeaways, setTakeaways] = useState("");
+  const [generatedContent, setGeneratedContent] = useState("");
   const [category, setCategory] = useState("");
-  const [tagTimi, setTagTimi] = useState(false);
+  const [hashtags, setHashtags] = useState("");
+  const [organizers, setOrganizers] = useState<Organizer[]>([{ name: "", linkedInUrl: "" }]);
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const { toast } = useToast();
@@ -58,11 +65,27 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
     }
   };
 
+  const addOrganizer = () => {
+    setOrganizers([...organizers, { name: "", linkedInUrl: "" }]);
+  };
+
+  const removeOrganizer = (index: number) => {
+    if (organizers.length > 1) {
+      setOrganizers(organizers.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateOrganizer = (index: number, field: 'name' | 'linkedInUrl', value: string) => {
+    const updated = [...organizers];
+    updated[index][field] = value;
+    setOrganizers(updated);
+  };
+
   const handleGeneratePost = async () => {
-    if (!content.trim()) {
+    if (!takeaways.trim()) {
       toast({
         title: "Error",
-        description: "Please provide some details about the event first",
+        description: "Please provide your takeaways first",
         variant: "destructive",
       });
       return;
@@ -72,24 +95,25 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
     try {
       const { data, error } = await supabase.functions.invoke('generate-linkedin-post', {
         body: { 
-          eventDetails: content,
+          takeaways: takeaways,
           eventTitle: eventTitle,
-          category: category || "Event Recap"
+          category: category || "General",
+          organizers: organizers.filter(o => o.name.trim())
         }
       });
 
       if (error) throw error;
 
-      setContent(data.post);
+      setGeneratedContent(data.post);
       toast({
         title: "Success",
-        description: "AI-generated post is ready!",
+        description: "AI-generated blog post is ready!",
       });
     } catch (error: any) {
       console.error("Error generating post:", error);
       toast({
         title: "Error",
-        description: "Failed to generate post",
+        description: "Failed to generate blog post",
         variant: "destructive",
       });
     } finally {
@@ -98,10 +122,10 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
   };
 
   const handlePublish = async () => {
-    if (!title.trim() || !content.trim() || !selectedPhotoId || !category) {
+    if (!title.trim() || !generatedContent.trim() || !selectedPhotoId) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields and generate content",
         variant: "destructive",
       });
       return;
@@ -112,17 +136,31 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const hashtags = ["#DOPE", "#CommunityEvents", `#${category.replace(/\s+/g, '')}`];
+      const hashtagArray = hashtags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag)
+        .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+
+      if (!hashtagArray.includes('#DOPE')) {
+        hashtagArray.unshift('#DOPE');
+      }
+
+      const organizerInfo = organizers
+        .filter(o => o.name.trim())
+        .map(o => `${o.name}${o.linkedInUrl ? ` (${o.linkedInUrl})` : ''}`)
+        .join(', ');
+
+      const finalContent = `${generatedContent}\n\n${organizerInfo ? `Event Organizers: ${organizerInfo}\n\n` : ''}${hashtagArray.join(' ')}`;
 
       const { error } = await supabase.from("blog_posts").insert({
         event_id: eventId,
         photographer_id: user.id,
         title,
-        content: `${content}\n\n${hashtags.join(' ')}\n\nCredits to #DOPE community`,
+        content: finalContent,
         cover_photo_id: selectedPhotoId,
-        category,
-        hashtags,
-        tag_timi: tagTimi,
+        category: category || "General",
+        hashtags: hashtagArray,
       });
 
       if (error) throw error;
@@ -145,27 +183,26 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
     }
   };
 
-  const handleShareToLinkedIn = () => {
-    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
-    window.open(linkedInUrl, '_blank');
-  };
-
   const resetForm = () => {
     setTitle("");
-    setContent("");
+    setTakeaways("");
+    setGeneratedContent("");
     setCategory("");
+    setHashtags("");
+    setOrganizers([{ name: "", linkedInUrl: "" }]);
     setSelectedPhotoId("");
-    setTagTimi(false);
   };
+
+  const selectedPhoto = photos.find(p => p.id === selectedPhotoId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Blog Post - {eventTitle}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-6 py-4">
           <div>
             <Label htmlFor="title">Title</Label>
             <Input
@@ -177,10 +214,10 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
           </div>
 
           <div>
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">Category (Optional)</Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Select category or leave blank" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Event Recap">Event Recap</SelectItem>
@@ -193,40 +230,113 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
           </div>
 
           <div>
-            <Label htmlFor="cover-photo">Cover Photo</Label>
-            <Select value={selectedPhotoId} onValueChange={setSelectedPhotoId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a photo" />
-              </SelectTrigger>
-              <SelectContent>
-                {photos.map((photo) => (
-                  <SelectItem key={photo.id} value={photo.id}>
-                    {photo.caption || `Photo ${photo.id.slice(0, 8)}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {selectedPhotoId && (
-              <div className="mt-2">
+            <Label>Cover Photo</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+              {photos.map((photo) => (
+                <Card
+                  key={photo.id}
+                  className={`cursor-pointer transition-all ${
+                    selectedPhotoId === photo.id
+                      ? "ring-2 ring-primary"
+                      : "hover:ring-1 hover:ring-border"
+                  }`}
+                  onClick={() => setSelectedPhotoId(photo.id)}
+                >
+                  <CardContent className="p-2">
+                    <img
+                      src={photo.file_url}
+                      alt={photo.caption || "Photo"}
+                      className="w-full h-32 object-cover rounded"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1 truncate">
+                      {photo.caption || `Photo ${photo.id.slice(0, 8)}`}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            {selectedPhoto && (
+              <div className="mt-4">
+                <p className="text-sm font-medium mb-2">Selected Cover Photo:</p>
                 <img
-                  src={photos.find(p => p.id === selectedPhotoId)?.file_url}
+                  src={selectedPhoto.file_url}
                   alt="Selected cover"
-                  className="w-full h-48 object-cover rounded-lg"
+                  className="w-full max-h-64 object-cover rounded-lg"
                 />
               </div>
             )}
           </div>
 
           <div>
-            <Label htmlFor="content">Content</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label>Organizers</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addOrganizer}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Organizer
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {organizers.map((organizer, index) => (
+                <div key={index} className="flex gap-2 items-start">
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      placeholder="Organizer name"
+                      value={organizer.name}
+                      onChange={(e) => updateOrganizer(index, 'name', e.target.value)}
+                    />
+                    <Input
+                      placeholder="LinkedIn URL (optional)"
+                      value={organizer.linkedInUrl}
+                      onChange={(e) => updateOrganizer(index, 'linkedInUrl', e.target.value)}
+                    />
+                  </div>
+                  {organizers.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeOrganizer(index)}
+                      className="mt-1"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="hashtags">Hashtags (comma-separated)</Label>
+            <Input
+              id="hashtags"
+              value={hashtags}
+              onChange={(e) => setHashtags(e.target.value)}
+              placeholder="photography, event, community"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              #DOPE will be automatically included
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="takeaways">Your Takeaways & Instructions for AI</Label>
             <Textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your blog post or generate with AI..."
-              rows={10}
+              id="takeaways"
+              value={takeaways}
+              onChange={(e) => setTakeaways(e.target.value)}
+              placeholder="Share your key takeaways from the event and any specific instructions for how you want the blog post to be written..."
+              rows={6}
               className="resize-none"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              The AI will use your takeaways and category to generate a blog post in the appropriate style
+            </p>
           </div>
 
           <Button
@@ -243,26 +353,30 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
             ) : (
               <>
                 <Sparkles className="mr-2 h-4 w-4" />
-                Generate Post with AI
+                Generate Blog Post with AI
               </>
             )}
           </Button>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="tag-timi"
-              checked={tagTimi}
-              onCheckedChange={(checked) => setTagTimi(checked as boolean)}
-            />
-            <label htmlFor="tag-timi" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Tag Timi for a repost
-            </label>
-          </div>
+          {generatedContent && (
+            <div>
+              <Label>Generated Blog Post</Label>
+              <Textarea
+                value={generatedContent}
+                onChange={(e) => setGeneratedContent(e.target.value)}
+                rows={12}
+                className="resize-none mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                You can edit the generated content before publishing
+              </p>
+            </div>
+          )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-4">
             <Button
               onClick={handlePublish}
-              disabled={publishing}
+              disabled={publishing || !generatedContent}
               className="flex-1"
             >
               {publishing ? (
@@ -271,16 +385,8 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
                   Publishing...
                 </>
               ) : (
-                "Publish to Blog"
+                "Publish Blog Post"
               )}
-            </Button>
-            <Button
-              onClick={handleShareToLinkedIn}
-              variant="outline"
-              className="flex-1"
-            >
-              <Share2 className="mr-2 h-4 w-4" />
-              Share to LinkedIn
             </Button>
           </div>
         </div>

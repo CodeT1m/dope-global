@@ -5,7 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Search, Image, Users, LogOut, UserCircle, Calendar } from "lucide-react";
-import dopeLogo from "@/assets/dope-logo.png";
+import logoDark from "@/assets/logo-dark.png";
+import logoLight from "@/assets/logo-light.png";
+import { useTheme } from "@/components/ThemeProvider";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import PhotoDiscoveryTab from "./PhotoDiscoveryTab";
 import UserEventsTab from "./UserEventsTab";
 import FeedTab from "./FeedTab";
@@ -19,6 +22,10 @@ interface UserDashboardProps {
 const UserDashboard = ({ user }: UserDashboardProps) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("discover");
+  const { theme } = useTheme();
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const logo = currentTheme === "dark" ? logoDark : logoLight;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -31,13 +38,16 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={dopeLogo} alt="DOPE" className="h-10 w-auto" />
+            <img src={logo} alt="DOPE" className="h-24 w-auto" />
             <span className="font-semibold">My Photos</span>
           </div>
-          <Button onClick={handleSignOut} variant="outline" size="sm">
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Button onClick={handleSignOut} variant="outline" size="sm">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 

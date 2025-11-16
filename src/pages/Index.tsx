@@ -59,9 +59,7 @@ const Index = () => {
 
             {/* Headline */}
             <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-              <span className="text-primary">Diary of</span>
-              <br />
-              <span className="text-accent">Photographers</span>
+              <span className="text-foreground">Diary of Photographers</span>
             </h1>
 
             {/* Subheadline */}
