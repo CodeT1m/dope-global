@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Plus, X } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, Sparkles, Plus, X, Share2 } from "lucide-react";
 
 interface Photo {
   id: string;
@@ -36,6 +36,7 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
   const [generatedContent, setGeneratedContent] = useState("");
   const [category, setCategory] = useState("");
   const [hashtags, setHashtags] = useState("");
+  const [tagTimi, setTagTimi] = useState(false);
   const [organizers, setOrganizers] = useState<Organizer[]>([{ name: "", linkedInUrl: "" }]);
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -161,6 +162,7 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
         cover_photo_id: selectedPhotoId,
         category: category || "General",
         hashtags: hashtagArray,
+        tag_timi: tagTimi,
       });
 
       if (error) throw error;
@@ -183,12 +185,18 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
     }
   };
 
+  const handleShareToLinkedIn = () => {
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
+    window.open(linkedInUrl, '_blank');
+  };
+
   const resetForm = () => {
     setTitle("");
     setTakeaways("");
     setGeneratedContent("");
     setCategory("");
     setHashtags("");
+    setTagTimi(false);
     setOrganizers([{ name: "", linkedInUrl: "" }]);
     setSelectedPhotoId("");
   };
@@ -217,9 +225,9 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
             <Label htmlFor="category">Category (Optional)</Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger>
-                <SelectValue placeholder="Select category or leave blank" />
+                <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card z-50">
                 <SelectItem value="Event Recap">Event Recap</SelectItem>
                 <SelectItem value="Behind the Scenes">Behind the Scenes</SelectItem>
                 <SelectItem value="Highlights">Highlights</SelectItem>
@@ -230,38 +238,32 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
           </div>
 
           <div>
-            <Label>Cover Photo</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-              {photos.map((photo) => (
-                <Card
-                  key={photo.id}
-                  className={`cursor-pointer transition-all ${
-                    selectedPhotoId === photo.id
-                      ? "ring-2 ring-primary"
-                      : "hover:ring-1 hover:ring-border"
-                  }`}
-                  onClick={() => setSelectedPhotoId(photo.id)}
-                >
-                  <CardContent className="p-2">
-                    <img
-                      src={photo.file_url}
-                      alt={photo.caption || "Photo"}
-                      className="w-full h-32 object-cover rounded"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {photo.caption || `Photo ${photo.id.slice(0, 8)}`}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Label htmlFor="cover-photo">Cover Photo</Label>
+            <Select value={selectedPhotoId} onValueChange={setSelectedPhotoId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a photo" />
+              </SelectTrigger>
+              <SelectContent className="bg-card z-50">
+                {photos.map((photo) => (
+                  <SelectItem key={photo.id} value={photo.id}>
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={photo.file_url}
+                        alt={photo.caption || "Photo"}
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                      <span>{photo.caption || `Photo ${photo.id.slice(0, 8)}`}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {selectedPhoto && (
-              <div className="mt-4">
-                <p className="text-sm font-medium mb-2">Selected Cover Photo:</p>
+              <div className="mt-3">
                 <img
                   src={selectedPhoto.file_url}
                   alt="Selected cover"
-                  className="w-full max-h-64 object-cover rounded-lg"
+                  className="w-full max-h-48 object-cover rounded-lg"
                 />
               </div>
             )}
@@ -373,6 +375,20 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
             </div>
           )}
 
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="tag-timi"
+              checked={tagTimi}
+              onCheckedChange={(checked) => setTagTimi(checked as boolean)}
+            />
+            <Label
+              htmlFor="tag-timi"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            >
+              Tag Timi in this post
+            </Label>
+          </div>
+
           <div className="flex gap-2 pt-4">
             <Button
               onClick={handlePublish}
@@ -387,6 +403,14 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
               ) : (
                 "Publish Blog Post"
               )}
+            </Button>
+            <Button
+              onClick={handleShareToLinkedIn}
+              variant="outline"
+              disabled={!generatedContent}
+            >
+              <Share2 className="mr-2 h-4 w-4" />
+              Share to LinkedIn
             </Button>
           </div>
         </div>
