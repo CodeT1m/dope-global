@@ -8,10 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader2 } from "lucide-react";
-import authLogo from "@/assets/auth-logo.png";
+import authLogoDark from "@/assets/auth-logo-dark.svg";
+import authLogoLight from "@/assets/auth-logo-light.svg";
 
 const Auth = () => {
   const { theme } = useTheme();
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const authLogo = currentTheme === "dark" ? authLogoDark : authLogoLight;
   
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");

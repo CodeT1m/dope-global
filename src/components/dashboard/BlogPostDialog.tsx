@@ -263,7 +263,7 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
                 <img
                   src={selectedPhoto.file_url}
                   alt="Selected cover"
-                  className="w-full max-h-48 object-cover rounded-lg"
+                  className="w-full h-48 object-contain rounded-lg border border-border"
                 />
               </div>
             )}
