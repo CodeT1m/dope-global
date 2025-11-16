@@ -8,14 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader2 } from "lucide-react";
-import logoDark from "@/assets/logo-dark.png";
-import logoLight from "@/assets/logo-light.png";
+import authLogo from "@/assets/auth-logo.png";
 
 const Auth = () => {
   const { theme } = useTheme();
-  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  const currentTheme = theme === "system" ? systemTheme : theme;
-  const logo = currentTheme === "dark" ? logoDark : logoLight;
   
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -141,7 +137,7 @@ const Auth = () => {
         <div className="gradient-card p-8 rounded-2xl shadow-elevated">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <img src={logo} alt="DOPE Logo" className="h-24 w-auto" />
+            <img src={authLogo} alt="DOPE Logo" className="h-48 w-auto" />
           </div>
 
           {/* Title */}
