@@ -33,7 +33,7 @@ const Index = () => {
         {/* Header - positioned absolute over hero */}
         <header className="absolute top-0 left-0 right-0 z-20 container mx-auto px-4 py-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-            <img src={logo} alt="DOPE Logo" className="h-20 w-auto" />
+            <img src={logo} alt="DOPE Logo" className="h-32 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -53,7 +53,7 @@ const Index = () => {
               <img 
                 src={logo} 
                 alt="DOPE Logo" 
-                className="h-32 w-auto animate-glow-pulse"
+                className="h-48 w-auto animate-glow-pulse"
               />
             </div>
 
@@ -189,7 +189,7 @@ const Index = () => {
           {/* Footer Bottom */}
           <div className="text-center space-y-6 border-t border-border pt-8">
             <div className="flex justify-center mb-4">
-              <img src={logo} alt="DOPE" className="h-16 w-auto opacity-80" />
+              <img src={logo} alt="DOPE" className="h-24 w-auto opacity-80" />
             </div>
             <p className="text-muted-foreground">
               Powered by DOPE • timinottimid

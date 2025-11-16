@@ -102,7 +102,7 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="DOPE" className="h-16 w-auto" />
+            <img src={logo} alt="DOPE" className="h-24 w-auto" />
             <div className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-primary" />
               <span className="font-semibold">Photographer Studio</span>
