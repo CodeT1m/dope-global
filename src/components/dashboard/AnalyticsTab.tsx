@@ -7,8 +7,6 @@ interface Stats {
   totalEvents: number;
   totalPhotos: number;
   totalReactions: number;
-  totalMemes: number;
-  approvedMemes: number;
 }
 
 const AnalyticsTab = () => {
@@ -16,8 +14,6 @@ const AnalyticsTab = () => {
     totalEvents: 0,
     totalPhotos: 0,
     totalReactions: 0,
-    totalMemes: 0,
-    approvedMemes: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -63,31 +59,11 @@ const AnalyticsTab = () => {
         reactionsCount = count || 0;
       }
 
-      // Fetch memes count
-      let memesCount = 0;
-      let approvedMemesCount = 0;
-      if (eventIds.length > 0) {
-        const { count: totalMemes } = await supabase
-          .from("memes")
-          .select("*", { count: 'exact', head: true })
-          .in("event_id", eventIds);
-
-        const { count: approvedMemes } = await supabase
-          .from("memes")
-          .select("*", { count: 'exact', head: true })
-          .in("event_id", eventIds)
-          .eq("is_approved", true);
-
-        memesCount = totalMemes || 0;
-        approvedMemesCount = approvedMemes || 0;
-      }
 
       setStats({
         totalEvents: eventsCount || 0,
         totalPhotos: photosCount || 0,
         totalReactions: reactionsCount,
-        totalMemes: memesCount,
-        approvedMemes: approvedMemesCount,
       });
       setLoading(false);
     };
@@ -118,19 +94,12 @@ const AnalyticsTab = () => {
       icon: Heart,
       color: "gradient-primary",
     },
-    {
-      title: "Approved Memes",
-      value: `${stats.approvedMemes}/${stats.totalMemes}`,
-      icon: TrendingUp,
-      color: "gradient-accent",
-    },
   ];
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
-      
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid md:grid-cols-3 gap-6">
         {statCards.map((stat, index) => (
           <Card key={index} className="p-6">
             <div className="flex items-center gap-4">
@@ -149,8 +118,8 @@ const AnalyticsTab = () => {
       <Card className="p-6">
         <h3 className="text-xl font-bold mb-4">Engagement Overview</h3>
         <p className="text-muted-foreground">
-          Your events have generated <span className="font-bold text-foreground">{stats.totalReactions}</span> reactions 
-          and <span className="font-bold text-foreground">{stats.totalMemes}</span> meme submissions.
+          Your events have generated <span className="font-bold text-foreground">{stats.totalReactions}</span> reactions
+          across <span className="font-bold text-foreground">{stats.totalPhotos}</span> photos.
         </p>
       </Card>
     </div>

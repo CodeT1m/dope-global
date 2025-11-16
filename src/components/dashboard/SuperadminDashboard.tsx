@@ -8,6 +8,7 @@ import { Crown, Users, Camera, Image, LogOut, BarChart3, UserCircle, Globe } fro
 import dopeLogo from "@/assets/dope-logo.png";
 import ProfileTab from "./ProfileTab";
 import HomepageManagementTab from "./HomepageManagementTab";
+import ManagementTab from "./ManagementTab";
 
 interface SuperadminDashboardProps {
   user: User;
@@ -147,38 +148,7 @@ const SuperadminDashboard = ({ user }: SuperadminDashboardProps) => {
           </TabsContent>
 
           <TabsContent value="management">
-            {/* Quick Actions */}
-            <div className="gradient-card p-8 rounded-xl shadow-elevated">
-              <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <Button className="gradient-primary justify-start h-auto py-4">
-                  <Users className="h-5 w-5 mr-3" />
-                  <div className="text-left">
-                    <div className="font-semibold">Manage Photographers</div>
-                    <div className="text-xs text-primary-foreground/70">Approve, suspend, or edit</div>
-                  </div>
-                </Button>
-
-                <Button className="gradient-accent justify-start h-auto py-4">
-                  <Crown className="h-5 w-5 mr-3" />
-                  <div className="text-left">
-                    <div className="font-semibold">Platform Settings</div>
-                    <div className="text-xs text-accent-foreground/70">Configure features & pricing</div>
-                  </div>
-                </Button>
-              </div>
-            </div>
-
-            {/* Coming Soon Notice */}
-            <div className="mt-8 text-center gradient-card p-12 rounded-xl">
-              <h3 className="text-2xl font-bold mb-4 text-gradient">
-                Full Management Dashboard Coming Soon
-              </h3>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                The complete superadmin management with user control, analytics, 
-                meme moderation, and platform configuration is under development.
-              </p>
-            </div>
+            <ManagementTab />
           </TabsContent>
 
           <TabsContent value="homepage">

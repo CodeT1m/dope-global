@@ -67,7 +67,7 @@ const Index = () => {
             {/* Subheadline */}
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
               AI-powered photo discovery meets viral engagement. 
-              Help your attendees find themselves instantly, create memes, 
+              Help your attendees find themselves instantly, 
               and build vibrant communities around every event.
             </p>
 
@@ -137,7 +137,7 @@ const Index = () => {
               </div>
               <h3 className="text-2xl font-bold mb-4">Viral Engagement</h3>
               <p className="text-muted-foreground leading-relaxed">
-                React, star favorites, and create memes. Turn every photo 
+                React and star favorites. Turn every photo 
                 into shareable content with auto-generated captions.
               </p>
             </div>
@@ -150,7 +150,7 @@ const Index = () => {
               <h3 className="text-2xl font-bold mb-4">Community Hub</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Build engaged communities around each event. Leaderboards, 
-                badges, and meme walls keep the conversation going.
+                badges keep the conversation going.
               </p>
             </div>
           </div>
