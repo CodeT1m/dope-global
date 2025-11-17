@@ -107,33 +107,41 @@ export const CommunitySection = () => {
       <div className="overflow-hidden">
         <div className="flex animate-scroll-horizontal gap-8 items-center">
           {/* Display sections twice for seamless loop */}
-          {[...sections, ...sections].map((section, index) => (
-            <a
-              key={`${section.id}-${index}`}
-              href={section.link_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 group"
-            >
-              {section.use_background ? (
-                <div className="w-40 h-40 bg-card border border-border rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
-                  <img
-                    src={section.logo_url}
-                    alt={section.alt_text}
-                    className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                  />
-                </div>
-              ) : (
-                <div className="w-40 h-40 flex items-center justify-center">
-                  <img
-                    src={section.logo_url}
-                    alt={section.alt_text}
-                    className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
-                  />
-                </div>
-              )}
-            </a>
-          ))}
+          {[...sections, ...sections].map((section, index) => {
+            const content = section.use_background ? (
+              <div className="w-40 h-40 bg-card border border-border rounded-xl p-4 hover:shadow-glow transition-all flex items-center justify-center">
+                <img
+                  src={section.logo_url}
+                  alt={section.alt_text}
+                  className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                />
+              </div>
+            ) : (
+              <div className="w-40 h-40 flex items-center justify-center">
+                <img
+                  src={section.logo_url}
+                  alt={section.alt_text}
+                  className="w-full h-full object-contain filter brightness-90 group-hover:brightness-110 transition-all"
+                />
+              </div>
+            );
+
+            return section.link_url ? (
+              <a
+                key={`${section.id}-${index}`}
+                href={section.link_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-shrink-0 group"
+              >
+                {content}
+              </a>
+            ) : (
+              <div key={`${section.id}-${index}`} className="flex-shrink-0">
+                {content}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

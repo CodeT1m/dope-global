@@ -54,8 +54,8 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">
-            <span className="text-gradient">Welcome!</span>
+          <h1 className="text-4xl font-bold mb-2 text-foreground">
+            Welcome!
           </h1>
           <p className="text-muted-foreground">
             {user.email}

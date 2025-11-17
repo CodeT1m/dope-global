@@ -89,8 +89,8 @@ const PhotoDiscoveryTab = () => {
     <div className="space-y-6">
       <Card className="p-8">
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold mb-2">
-            <span className="text-gradient">AI Photo Discovery</span>
+          <h2 className="text-3xl font-bold mb-2 text-foreground">
+            Find Your Photos
           </h2>
           <p className="text-muted-foreground">
             Upload a selfie or take a photo to find all your event photos instantly
