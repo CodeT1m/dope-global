@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 80" width="400" height="80">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&amp;display=swap');
+    </style>
+  </defs>
+  <text x="200" y="50" font-family="'Montserrat', sans-serif" font-weight="700" font-size="32" fill="#1C1F20" text-anchor="middle">
+    THIS IS DOPE
+  </text>
+</svg>

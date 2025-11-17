@@ -7,6 +7,9 @@ import heroDark from "@/assets/hero-dark.jpg";
 import heroLight from "@/assets/hero-light.jpg";
 import logoDark from "@/assets/logo-dark.svg";
 import logoLight from "@/assets/logo-light.svg";
+import thisIsDopeDark from "@/assets/this-is-dope-dark.svg";
+import thisIsDopeLight from "@/assets/this-is-dope-light.svg";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ResourcesSection, CommunitySection } from "@/components/homepage/HomepageSections";
 import { IntroAnimation } from "@/components/IntroAnimation";
 
@@ -16,6 +19,7 @@ const Index = () => {
   const currentTheme = theme === "system" ? systemTheme : theme;
   const heroBg = currentTheme === "dark" ? heroDark : heroLight;
   const logo = currentTheme === "dark" ? logoDark : logoLight;
+  const thisIsDopeLogo = currentTheme === "dark" ? thisIsDopeDark : thisIsDopeLight;
 
   return (
     <div className="min-h-screen">
@@ -187,63 +191,67 @@ const Index = () => {
           <CommunitySection />
 
           {/* Footer Bottom */}
-          <div className="text-center space-y-6 border-t border-border pt-8">
+          <div className="text-center space-y-8 border-t border-border pt-8">
             <div className="flex justify-center mb-4">
-              <img src={logo} alt="DOPE" className="h-24 w-auto opacity-80" />
+              <img src={thisIsDopeLogo} alt="THIS IS DOPE" className="h-16 w-auto opacity-90" />
             </div>
-            <p className="text-muted-foreground">
-              Powered by DOPE • timinottimid
-            </p>
             
-            {/* Connect with DOPE founder */}
+            {/* Founder Section */}
             <div className="space-y-4">
-              <p className="text-xl font-bold text-primary animate-fade-in animate-pulse">
-                ✨ Connect with DOPE Founder ✨
+              <p className="text-lg font-semibold text-foreground">
+                Founder
               </p>
-              <div className="flex justify-center gap-6 text-base">
-                <a 
-                  href="https://instagram.com/timi.jpeng" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-all hover:scale-125 transform animate-fade-in hover:shadow-glow"
-                  style={{ animationDelay: "0.1s" }}
-                >
-                  Instagram
-                </a>
-                <a 
-                  href="https://linkedin.com/in/ileladewa-oluwatimilehin" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-all hover:scale-125 transform animate-fade-in hover:shadow-glow"
-                  style={{ animationDelay: "0.2s" }}
-                >
-                  LinkedIn
-                </a>
-                <a 
-                  href="https://behance.net/timinottimid" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-all hover:scale-125 transform animate-fade-in hover:shadow-glow"
-                  style={{ animationDelay: "0.3s" }}
-                >
-                  Behance
-                </a>
-                <a 
-                  href="https://x.com/timinottimid" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-all hover:scale-125 transform animate-fade-in hover:shadow-glow"
-                  style={{ animationDelay: "0.4s" }}
-                >
-                  X (Twitter)
-                </a>
-              </div>
-                <p className="text-xs text-muted-foreground pt-4">
-                  © 2025 DOPE. All rights reserved.
-                </p>
+              <div className="flex flex-col items-center gap-4">
+                <Avatar className="h-24 w-24 border-2 border-primary">
+                  <AvatarImage src="https://simgviumtqekzklsqfpc.supabase.co/storage/v1/object/public/avatars/timi-founder.jpg" alt="Timi" />
+                  <AvatarFallback>TJ</AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <p className="font-bold text-foreground">Timilehin Ileladewa</p>
+                  <p className="text-sm text-muted-foreground">@timinottimid</p>
+                </div>
+                <div className="flex justify-center gap-6 text-sm">
+                  <a 
+                    href="https://instagram.com/timi.jpeng" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform"
+                  >
+                    Instagram
+                  </a>
+                  <a 
+                    href="https://linkedin.com/in/ileladewa-oluwatimilehin" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform"
+                  >
+                    LinkedIn
+                  </a>
+                  <a 
+                    href="https://behance.net/timinottimid" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform"
+                  >
+                    Behance
+                  </a>
+                  <a 
+                    href="https://x.com/timinottimid" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary transition-all hover:scale-110 transform"
+                  >
+                    X
+                  </a>
+                </div>
               </div>
             </div>
+
+            <p className="text-xs text-muted-foreground pt-4">
+              © 2025 DOPE. All rights reserved.
+            </p>
           </div>
+        </div>
         </footer>
     </div>
   );

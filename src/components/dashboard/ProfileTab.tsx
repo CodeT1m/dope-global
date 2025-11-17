@@ -201,9 +201,9 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
         </div>
 
         {/* Basic Info */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
-            <Label htmlFor="full_name">Full Name</Label>
+            <Label htmlFor="full_name" className="text-base font-semibold">Full Name</Label>
             <Input
               id="full_name"
               value={profile.full_name}
