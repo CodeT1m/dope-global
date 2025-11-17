@@ -8,6 +8,7 @@ import heroLight from "@/assets/hero-light.jpg";
 import logoDark from "@/assets/logo-dark.svg";
 import logoLight from "@/assets/logo-light.svg";
 import { ResourcesSection, CommunitySection } from "@/components/homepage/HomepageSections";
+import { IntroAnimation } from "@/components/IntroAnimation";
 
 const Index = () => {
   const { theme } = useTheme();
@@ -18,10 +19,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      <IntroAnimation />
+      {/* Hero Section with Dot Pattern */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
+        {/* Dot Pattern Background */}
+        <div className="absolute inset-0 z-0 dot-pattern">
           <img 
             src={heroBg} 
             alt="DOPE Background" 
