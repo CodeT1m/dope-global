@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,13 +55,15 @@ const Auth = () => {
         
         if (error) throw error;
 
-        if (data.session) {
-          toast({
-            title: "Welcome back!",
-            description: "You've successfully signed in.",
-          });
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully signed in.",
+        });
+        
+        // Force navigation after successful login
+        setTimeout(() => {
           navigate("/dashboard", { replace: true });
-        }
+        }, 100);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -97,7 +99,7 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/dashboard`,
         }
       });
       
@@ -116,7 +118,7 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/dashboard`,
         }
       });
       
@@ -264,9 +266,9 @@ const Auth = () => {
 
         {/* Back to Home */}
         <div className="mt-6 text-center">
-          <a href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← Back to home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

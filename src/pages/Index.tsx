@@ -28,18 +28,13 @@ const Index = () => {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Dot Pattern Background */}
         <div className="absolute inset-0 z-0 dot-pattern">
-          <img 
-            src={heroBg} 
-            alt="DOPE Background" 
-            className="w-full h-full object-cover opacity-40"
-          />
           <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
         </div>
 
         {/* Header - positioned absolute over hero */}
         <header className="absolute top-0 left-0 right-0 z-20 container mx-auto px-4 py-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-            <img src={logo} alt="DOPE Logo" className="h-32 w-auto" />
+            <img src={logo} alt="DOPE Logo" className="h-20 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -59,7 +54,7 @@ const Index = () => {
               <img 
                 src={logo} 
                 alt="DOPE Logo" 
-                className="h-48 w-auto animate-glow-pulse"
+                className="h-64 w-auto animate-glow-pulse"
               />
             </div>
 
