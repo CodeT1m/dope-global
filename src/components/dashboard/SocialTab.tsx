@@ -223,7 +223,9 @@ const SocialTab = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">Community Member</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user.is_photographer ? 'DOPE Photographer' : 'DOPE User'}
+                    </p>
                   </div>
                 </div>
                 {user.is_photographer && (
