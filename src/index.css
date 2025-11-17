@@ -180,6 +180,38 @@ All colors MUST be HSL.
     background-image: radial-gradient(circle, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px);
     background-size: 20px 20px;
   }
+
+  .animate-scroll-horizontal {
+    animation: scroll-horizontal 30s linear infinite;
+  }
+
+  .animate-scroll-horizontal:hover {
+    animation-play-state: paused;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-300 ease-out hover:scale-105;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+  }
+
+  .animate-fade-out {
+    animation: fade-out 0.6s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s ease-out forwards;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
 }
 
 @keyframes scroll-horizontal {
@@ -299,35 +331,3 @@ All colors MUST be HSL.
     }
   }
 
-  .animate-scroll-horizontal {
-    animation: scroll-horizontal 30s linear infinite;
-  }
-
-  .animate-scroll-horizontal:hover {
-    animation-play-state: paused;
-  }
-
-  .hover-scale {
-    @apply transition-transform duration-300 ease-out hover:scale-105;
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.6s ease-out forwards;
-  }
-
-  .animate-fade-out {
-    animation: fade-out 0.6s ease-out forwards;
-  }
-
-  .animate-scale-in {
-    animation: scale-in 0.4s ease-out forwards;
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  .animate-glow-pulse {
-    animation: glow-pulse 2s ease-in-out infinite;
-  }
-}
