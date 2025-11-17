@@ -10,7 +10,6 @@ import PhotographerReviewDialog from "./PhotographerReviewDialog";
 
 interface UserProfile {
   id: string;
-  email: string;
   full_name: string | null;
   avatar_url: string | null;
   is_photographer?: boolean;
@@ -45,7 +44,7 @@ const SocialTab = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, full_name, avatar_url');
+        .select('id, full_name, avatar_url');
 
       if (error) throw error;
 
@@ -157,7 +156,7 @@ const SocialTab = () => {
   };
 
   const filteredUsers = users.filter(user => 
-    !locationFilter || user.email.toLowerCase().includes(locationFilter.toLowerCase())
+    !locationFilter || (user.full_name?.toLowerCase().includes(locationFilter.toLowerCase()))
   );
 
   if (loading) {
@@ -173,7 +172,7 @@ const SocialTab = () => {
       {selectedUser && selectedUser.is_photographer && (
         <PhotographerReviewDialog
           photographerId={selectedUser.id}
-          photographerName={selectedUser.full_name || selectedUser.email}
+          photographerName={selectedUser.full_name || 'Photographer'}
           open={reviewDialogOpen}
           onOpenChange={setReviewDialogOpen}
         />
@@ -183,7 +182,7 @@ const SocialTab = () => {
         <div className="relative flex-1">
           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Filter by location or email..."
+            placeholder="Filter by location or name..."
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
             className="pl-10"
@@ -207,7 +206,7 @@ const SocialTab = () => {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold">
-                      {user.full_name?.[0] || user.email[0].toUpperCase()}
+                      {user.full_name?.[0]?.toUpperCase() || 'U'}
                     </div>
                     {user.is_photographer && (
                       <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1">
@@ -224,7 +223,7 @@ const SocialTab = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <p className="text-sm text-muted-foreground">Community Member</p>
                   </div>
                 </div>
                 {user.is_photographer && (
@@ -270,7 +269,7 @@ const SocialTab = () => {
         {/* Selected User's Events */}
         <div className="space-y-4">
           <h3 className="text-xl font-bold">
-            {selectedUser ? `${selectedUser.full_name || selectedUser.email}'s Events` : 'Select a User'}
+            {selectedUser ? `${selectedUser.full_name || 'User'}'s Events` : 'Select a User'}
           </h3>
           {selectedUser && (
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
