@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, Calendar, Image as ImageIcon, Loader2, Camera, Star, UserPlus, UserMinus } from "lucide-react";
+import { MapPin, Calendar, Image as ImageIcon, Loader2, Camera, Star, UserPlus, UserMinus, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useFollow, useFollowersList } from "@/hooks/useConvex";
 import PhotographerReviewDialog from "./PhotographerReviewDialog";
+import FollowersDialog from "./FollowersDialog";
+import UserCard from "./UserCard";
 
 interface UserProfile {
   id: string;
@@ -32,7 +35,15 @@ const SocialTab = () => {
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [followersDialogOpen, setFollowersDialogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUser(user);
+    });
+  }, []);
 
   useEffect(() => {
     fetchUsers();
@@ -40,8 +51,6 @@ const SocialTab = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
       const { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url');
@@ -56,20 +65,10 @@ const SocialTab = () => {
 
       const photographerIds = new Set(roles?.map(r => r.user_id) || []);
 
-      // Check follow status
-      let followingIds = new Set<string>();
-      if (user) {
-        const { data: following } = await supabase
-          .from('photographer_followers')
-          .select('photographer_id')
-          .eq('follower_id', user.id);
-        followingIds = new Set(following?.map(f => f.photographer_id) || []);
-      }
-
       const usersWithMeta = (data || []).map(u => ({
         ...u,
         is_photographer: photographerIds.has(u.id),
-        is_following: followingIds.has(u.id),
+        is_following: false,
       }));
 
       setUsers(usersWithMeta);
@@ -196,69 +195,20 @@ const SocialTab = () => {
           <h3 className="text-xl font-bold">Community Members</h3>
           <div className="space-y-3 max-h-[600px] overflow-y-auto">
             {filteredUsers.map((user) => (
-              <Card
-                key={user.id}
-                onClick={() => handleUserClick(user)}
-                className={`p-4 cursor-pointer transition-all hover:shadow-glow ${
-                  selectedUser?.id === user.id ? 'shadow-glow border-primary' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold">
-                      {user.full_name?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                    {user.is_photographer && (
-                      <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1">
-                        <Camera className="h-3 w-3 text-primary-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold">{user.full_name || 'Anonymous'}</p>
-                      {user.is_photographer && (
-                        <Badge variant="secondary" className="text-xs">
-                          Photographer
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {user.is_photographer ? 'DOPE Photographer' : 'DOPE User'}
-                    </p>
-                  </div>
-                </div>
-                {user.is_photographer && (
-                  <div className="mt-3 flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFollowToggle(user.id);
-                      }}
-                    >
-                      {user.is_following ? (
-                        <><UserMinus className="h-3 w-3 mr-1" />Unfollow</>
-                      ) : (
-                        <><UserPlus className="h-3 w-3 mr-1" />Follow</>
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedUser(user);
-                        setReviewDialogOpen(true);
-                      }}
-                    >
-                      <Star className="h-3 w-3 mr-1" />
-                      Review
-                    </Button>
-                  </div>
-                )}
-              </Card>
+              <div key={user.id} onClick={() => handleUserClick(user)}>
+                <UserCard
+                  user={user}
+                  currentUserId={currentUser?.id || ''}
+                  onReview={() => {
+                    setSelectedUser(user);
+                    setReviewDialogOpen(true);
+                  }}
+                  onViewFollowers={() => {
+                    setSelectedUser(user);
+                    setFollowersDialogOpen(true);
+                  }}
+                />
+              </div>
             ))}
             {filteredUsers.length === 0 && (
               <p className="text-center text-muted-foreground py-8">
@@ -316,6 +266,19 @@ const SocialTab = () => {
           )}
         </div>
       </div>
+
+      <PhotographerReviewDialog
+        open={reviewDialogOpen}
+        onOpenChange={setReviewDialogOpen}
+        photographerId={selectedUser?.id || ''}
+        photographerName={selectedUser?.full_name || 'Photographer'}
+      />
+
+      <FollowersDialog
+        open={followersDialogOpen}
+        onOpenChange={setFollowersDialogOpen}
+        userId={selectedUser?.id || ''}
+      />
     </div>
   );
 };

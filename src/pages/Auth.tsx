@@ -26,15 +26,14 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
         navigate("/dashboard", { replace: true });
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
         navigate("/dashboard", { replace: true });
       }
     });
@@ -59,11 +58,6 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You've successfully signed in.",
         });
-        
-        // Force navigation after successful login
-        setTimeout(() => {
-          navigate("/dashboard", { replace: true });
-        }, 100);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
