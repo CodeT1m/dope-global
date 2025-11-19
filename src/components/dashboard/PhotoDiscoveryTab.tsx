@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Camera, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const PhotoDiscoveryTab = () => {
   const [cameraActive, setCameraActive] = useState(false);
@@ -67,17 +68,43 @@ const PhotoDiscoveryTab = () => {
   };
 
   const searchPhotos = async () => {
+    if (!capturedImage) {
+      toast({
+        title: "No Image",
+        description: "Please capture or upload a photo first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSearching(true);
     
-    // Simulate AI search - in production, this would call a face recognition API
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    toast({
-      title: "Search Complete",
-      description: "AI face matching feature coming soon! This will find all your photos across events.",
-    });
-    
-    setSearching(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('match-face', {
+        body: { image: capturedImage }
+      });
+
+      if (error) throw error;
+
+      const matches = data?.matches || [];
+      
+      toast({
+        title: "Search Complete",
+        description: `Found ${matches.length} photo(s) with matching faces!`,
+      });
+      
+      console.log('Matched photos:', matches);
+      
+    } catch (error) {
+      console.error('Error searching photos:', error);
+      toast({
+        title: "Search Failed",
+        description: error.message || "An error occurred during face matching",
+        variant: "destructive",
+      });
+    } finally {
+      setSearching(false);
+    }
   };
 
   const resetCapture = () => {
