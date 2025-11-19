@@ -59,7 +59,7 @@ const Index = () => {
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+            <h1 className="text-5xl md:text-7xl font-copperplate font-bold leading-tight">
               <span className="text-foreground">Diary of Photographers</span>
             </h1>
 
