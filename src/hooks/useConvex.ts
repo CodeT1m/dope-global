@@ -1,76 +1,10 @@
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation } from "convex/react";
 
-// Convex integration - will be functional after running `npx convex dev`
-// For now, using placeholder implementations until Convex is initialized
-
-export function useFollow(userId: string, targetUserId: string) {
-  const { toast } = useToast();
-  
-  // Placeholder implementation
-  const isFollowing = false;
-  const followerCount = 0;
-
-  const handleFollow = async () => {
-    toast({
-      title: "Convex Setup Required",
-      description: "Run 'npx convex dev' to enable real-time follow functionality",
-      variant: "destructive",
-    });
-  };
-
-  const handleUnfollow = async () => {
-    toast({
-      title: "Convex Setup Required",
-      description: "Run 'npx convex dev' to enable real-time follow functionality",
-      variant: "destructive",
-    });
-  };
-
-  return {
-    isFollowing,
-    followerCount,
-    handleFollow,
-    handleUnfollow,
-  };
-}
-
-export function useFollowersList(userId: string) {
-  return {
-    followers: [],
-    following: [],
-    followerCount: 0,
-    followingCount: 0,
-  };
-}
-
-export function useNotifications(userId: string) {
-  return {
-    notifications: [],
-    unreadCount: 0,
-    markAsRead: async () => {},
-    markAllAsRead: async () => {},
-  };
-}
-
-export function usePresence(userId: string) {
-  useEffect(() => {
-    console.log("Presence tracking ready for:", userId);
-  }, [userId]);
-}
-
-export function useChat(userId: string, otherUserId: string) {
-  const sendMessage = async (content: string) => {
-    console.log("Message ready to send:", content);
-  };
-
-  return {
-    messages: [],
-    unreadCount: 0,
-    sendMessage,
-    markAsRead: async () => {},
-  };
-}
+// Import Convex API - will be generated after running `npx convex dev`
+// @ts-ignore - Generated during Convex setup
+import { api } from "../../convex/_generated/api";
 
 export function useFollow(userId: string, targetUserId: string) {
   const { toast } = useToast();
