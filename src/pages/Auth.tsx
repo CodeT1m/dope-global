@@ -8,8 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader2 } from "lucide-react";
-import authLogoDark from "@/assets/auth-logo-dark.svg";
-import authLogoLight from "@/assets/auth-logo-light.svg";
+import authLogoDark from "@/assets/TDOPE_lightfont.svg";
+import authLogoLight from "@/assets/TDOPE_darkfont.svg";
 
 const Auth = () => {
   const { theme } = useTheme();
@@ -26,19 +26,23 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        navigate("/dashboard", { replace: true });
-      }
-    });
-
+    // Check for existing session first
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/dashboard", { replace: true });
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigate("/dashboard", { replace: true });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -54,16 +58,26 @@ const Auth = () => {
         
         if (error) throw error;
 
-        toast({
-          title: "Welcome back!",
-          description: "You've successfully signed in.",
-        });
+        // Check if session was created
+        if (data.session) {
+          toast({
+            title: "Welcome back!",
+            description: "You've successfully signed in.",
+          });
+          // Small delay to ensure session is fully set
+          setTimeout(() => {
+            navigate("/dashboard", { replace: true });
+          }, 100);
+        } else {
+          // If no session in response, wait for auth state change
+          // The useEffect listener will handle navigation
+        }
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
             data: {
               full_name: fullName,
             }
@@ -136,7 +150,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="gradient-card p-8 rounded-2xl shadow-elevated">
           {/* Logo */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-4">
             <img src={authLogo} alt="DOPE Logo" className="h-48 w-auto" />
           </div>
 
@@ -260,8 +274,12 @@ const Auth = () => {
 
         {/* Back to Home */}
         <div className="mt-6 text-center">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Back to home
+          <Link 
+            to="/" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
+          >
+            <span>←</span>
+            <span>Back to home</span>
           </Link>
         </div>
       </div>

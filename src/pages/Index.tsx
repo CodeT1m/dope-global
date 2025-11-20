@@ -5,10 +5,10 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
 import heroDark from "@/assets/hero-dark.jpg";
 import heroLight from "@/assets/hero-light.jpg";
-import logoDark from "@/assets/logo-dark.svg";
-import logoLight from "@/assets/logo-light.svg";
-import thisIsDopeDark from "@/assets/this-is-dope-dark.svg";
-import thisIsDopeLight from "@/assets/this-is-dope-light.svg";
+import logoDark from "@/assets/DOPE_lightfont.svg";
+import logoLight from "@/assets/DOPE_darkfont.svg";
+import thisIsDopeDark from "@/assets/TDOPE_lightfont.svg";
+import thisIsDopeLight from "@/assets/TDOPE_darkfont.svg";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ResourcesSection, CommunitySection } from "@/components/homepage/HomepageSections";
 import { IntroAnimation } from "@/components/IntroAnimation";
@@ -34,7 +34,7 @@ const Index = () => {
         {/* Header - positioned absolute over hero */}
         <header className="absolute top-0 left-0 right-0 z-20 container mx-auto px-4 py-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-            <img src={logo} alt="DOPE Logo" className="h-20 w-auto" />
+            <img src={logo} alt="DOPE Logo" className="h-32 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -50,21 +50,16 @@ const Index = () => {
         <div className="relative z-10 container mx-auto px-4 py-20">
           <div className="max-w-5xl mx-auto text-center space-y-8 animate-fade-in-up">
             {/* Logo */}
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-center mb-4">
               <img 
                 src={logo} 
                 alt="DOPE Logo" 
-                className="h-64 w-auto animate-glow-pulse"
+                className="h-96 w-auto animate-glow-pulse"
               />
             </div>
 
-            {/* Headline */}
-            <h1 className="text-5xl md:text-7xl font-copperplate font-bold leading-tight">
-              <span className="text-foreground">Diary of Photographers</span>
-            </h1>
-
             {/* Subheadline */}
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-montserrat">
               AI-powered photo discovery meets viral engagement. 
               Help your attendees find themselves instantly, 
               and build vibrant communities around every event.
@@ -87,7 +82,7 @@ const Index = () => {
             </div>
 
             {/* Social Proof */}
-            <p className="text-sm text-muted-foreground pt-4">
+            <p className="text-sm text-muted-foreground pt-4 font-montserrat">
               Trusted by photographers • Loved by attendees • Powered by AI
             </p>
           </div>
@@ -111,7 +106,7 @@ const Index = () => {
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="text-primary">Why DOPE?</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-montserrat">
               Transform event photography into interactive experiences
             </p>
           </div>
@@ -123,7 +118,7 @@ const Index = () => {
                 <Zap className="h-7 w-7 text-primary-foreground" />
               </div>
               <h3 className="text-2xl font-bold mb-4">AI Photo Discovery</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed font-montserrat">
                 Upload your selfie and let AI find all your photos instantly. 
                 No more endless scrolling through hundreds of images.
               </p>
@@ -135,7 +130,7 @@ const Index = () => {
                 <Sparkles className="h-7 w-7 text-accent-foreground" />
               </div>
               <h3 className="text-2xl font-bold mb-4">Viral Engagement</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed font-montserrat">
                 React and star favorites. Turn every photo 
                 into shareable content with auto-generated captions.
               </p>
@@ -147,7 +142,7 @@ const Index = () => {
                 <Users className="h-7 w-7 text-primary-foreground" />
               </div>
               <h3 className="text-2xl font-bold mb-4">Community Hub</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed font-montserrat">
                 Build engaged communities around each event. Leaderboards, 
                 badges keep the conversation going.
               </p>
@@ -164,7 +159,7 @@ const Index = () => {
             <h2 className="text-4xl font-bold">
               <span className="text-primary">For Photographers</span>
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground font-montserrat">
               Create your branded event galleries, engage your audience with 
               AI-powered features, and grow your photography business with DOPE.
             </p>
@@ -203,7 +198,7 @@ const Index = () => {
                 </Avatar>
                 <div className="text-center">
                   <p className="font-bold text-foreground">Timilehin Ileladewa</p>
-                  <p className="text-sm text-muted-foreground">@timinottimid</p>
+                  <p className="text-sm text-muted-foreground font-montserrat">@timinottimid</p>
                 </div>
                 <div className="flex justify-center gap-6 text-sm">
                   <a 
@@ -254,7 +249,7 @@ const Index = () => {
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground pt-4">
+            <p className="text-xs text-muted-foreground pt-4 font-montserrat">
               © 2025 DOPE. All rights reserved.
             </p>
           </div>

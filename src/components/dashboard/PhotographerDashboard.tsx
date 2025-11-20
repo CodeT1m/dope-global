@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Camera, LogOut, Calendar, BarChart3, AlertCircle, UserCircle, Heart, Users as UsersIcon } from "lucide-react";
-import logoDark from "@/assets/logo-dark.svg";
-import logoLight from "@/assets/logo-light.svg";
+import { Camera, LogOut, Calendar, BarChart3, AlertCircle, UserCircle, Heart, Users as UsersIcon, CreditCard } from "lucide-react";
+import logoDark from "@/assets/DOPE_lightfont.svg";
+import logoLight from "@/assets/DOPE_darkfont.svg";
 import { useTheme } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import CreateEventDialog from "./CreateEventDialog";
@@ -14,6 +14,7 @@ import EventsListTab from "./EventsListTab";
 import RemoveRequestsTab from "./RemoveRequestsTab";
 import AnalyticsTab from "./AnalyticsTab";
 import ProfileTab from "./ProfileTab";
+import SubscriptionTab from "./SubscriptionTab";
 
 interface PhotographerDashboardProps {
   user: User;
@@ -183,7 +184,7 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-3xl grid-cols-4 mb-8">
+          <TabsList className="grid w-full max-w-4xl grid-cols-5 mb-8">
             <TabsTrigger value="events">
               <Calendar className="h-4 w-4 mr-2" />
               Events
@@ -195,6 +196,10 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="subscription">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Subscription
             </TabsTrigger>
             <TabsTrigger value="profile">
               <UserCircle className="h-4 w-4 mr-2" />
@@ -212,6 +217,10 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
 
           <TabsContent value="analytics">
             <AnalyticsTab />
+          </TabsContent>
+
+          <TabsContent value="subscription">
+            <SubscriptionTab />
           </TabsContent>
 
           <TabsContent value="profile">

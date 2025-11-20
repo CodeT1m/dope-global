@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         copperplate: ['"Copperplate Gothic"', 'serif'],
+        montserrat: ['"Montserrat"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
