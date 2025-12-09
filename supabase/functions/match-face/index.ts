@@ -1,19 +1,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { image } = await req.json();
-    
+    const { image } = await req.json(); // base64 of reference image
+
     if (!image) {
       throw new Error("No image provided");
     }
@@ -23,7 +29,6 @@ serve(async (req) => {
       throw new Error("GEMINI_API_KEY not configured");
     }
 
-    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -31,26 +36,21 @@ serve(async (req) => {
 
     // Get authenticated user
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header");
-    }
-
+    if (!authHeader) throw new Error("No authorization header");
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-    
-    if (userError || !user) {
-      throw new Error("User not authenticated");
-    }
+    if (userError || !user) throw new Error("User not authenticated");
 
-    // Fetch all photos from the database
+    // Fetch up to 50 recent photos
     const { data: photos, error: photosError } = await supabaseClient
       .from('photos')
-      .select('id, file_url, event_id, photographer_id')
-      .limit(100);
+      .select('id, file_url')
+      .order('created_at', { ascending: false })
+      .limit(50);
 
-    if (photosError) {
-      throw new Error(`Error fetching photos: ${photosError.message}`);
-    }
+    if (photosError) throw new Error(`Error fetching photos: ${photosError.message}`);
+
+    console.log(`Fetched ${photos?.length || 0} photos from database`);
 
     if (!photos || photos.length === 0) {
       return new Response(JSON.stringify({ matches: [] }), {
@@ -58,49 +58,100 @@ serve(async (req) => {
       });
     }
 
-    // Use Gemini API to find matching faces
-    const matchedPhotos = [];
-    
-    // Process in batches to avoid rate limits
-    for (const photo of photos.slice(0, 20)) { // Limit to first 20 for performance
+    // Process in batches of 10
+    const BATCH_SIZE = 10;
+    const matchedPhotos: any[] = [];
+    const batches = [];
+
+    for (let i = 0; i < photos.length; i += BATCH_SIZE) {
+      batches.push(photos.slice(i, i + BATCH_SIZE));
+    }
+
+    const referenceImageBase64 = image.includes('base64,') ? image.split(',')[1] : image;
+
+    console.log(`Processing ${batches.length} batches...`);
+
+    for (const batch of batches) {
       try {
+        const batchContent: any[] = [
+          {
+            text: `I will provide a reference photo (the first image) and then ${batch.length} candidate photos labeled with IDs. 
+            Identify which of the candidate photos contain the SAME person as the reference photo.
+            Focus on facial features. Be precise.
+            Return a JSON object with a single key "matchedIds" which is a list of strings containing the IDs of the matching candidate photos.
+            If no photos match, return empty list of ids.`
+          },
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: referenceImageBase64
+            }
+          }
+        ];
+
+        // Add candidate images to prompt
+        for (const photo of batch) {
+          try {
+            const base64 = await fetchImageAsBase64(photo.file_url);
+            batchContent.push({
+              text: `Candidate Photo ID: ${photo.id}`
+            });
+            batchContent.push({
+              inlineData: {
+                mimeType: "image/jpeg",
+                data: base64
+              }
+            });
+          } catch (e) {
+            console.error(`Failed to load photo ${photo.id}`, e);
+          }
+        }
+
+        console.log(`Sending batch of ${batch.length} photos to Gemini...`);
+
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{
-                parts: [
-                  {
-                    text: "Does this photo contain the same person as the reference image? Respond with only 'YES' or 'NO'."
-                  },
-                  {
-                    inlineData: {
-                      mimeType: "image/jpeg",
-                      data: image.split(',')[1] // Remove data:image/jpeg;base64, prefix
-                    }
-                  },
-                  {
-                    inlineData: {
-                      mimeType: "image/jpeg",
-                      data: await fetchImageAsBase64(photo.file_url)
-                    }
-                  }
-                ]
-              }]
+              contents: [{ parts: batchContent }],
+              generationConfig: {
+                responseMimeType: "application/json"
+              }
             })
           }
         );
 
-        const result = await response.json();
-        const answer = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim().toUpperCase();
-        
-        if (answer === 'YES') {
-          matchedPhotos.push(photo);
+        if (!response.ok) {
+          console.error(`Gemini API error: ${response.status} ${response.statusText}`);
+          const errorText = await response.text();
+          console.error("Error body:", errorText);
+          continue;
         }
+
+        const result = await response.json();
+        let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        console.log("Gemini Raw Response:", textResponse);
+
+        if (textResponse) {
+          // Clean up markdown code blocks if present
+          textResponse = textResponse.replace(/```json\n?|\n?```/g, "").trim();
+
+          try {
+            const parsed = JSON.parse(textResponse);
+            const ids = parsed.matchedIds || [];
+            console.log(`Batch matched IDs: ${ids.join(', ')}`);
+            const matches = batch.filter(p => ids.includes(p.id));
+            matchedPhotos.push(...matches);
+          } catch (e) {
+            console.error("Failed to parse Gemini response:", textResponse, e);
+          }
+        }
+
       } catch (error) {
-        console.error(`Error processing photo ${photo.id}:`, error);
+        console.error("Error processing batch:", error);
       }
     }
 

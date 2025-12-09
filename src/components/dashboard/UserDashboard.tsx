@@ -72,14 +72,14 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
               <Calendar className="h-4 w-4 mr-2" />
               Events
             </TabsTrigger>
-            <TabsTrigger value="feed">
+            {/* <TabsTrigger value="feed">
               <Image className="h-4 w-4 mr-2" />
               Feed
             </TabsTrigger>
             <TabsTrigger value="social">
               <Users className="h-4 w-4 mr-2" />
               Social
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="profile">
               <UserCircle className="h-4 w-4 mr-2" />
               Profile
@@ -94,7 +94,7 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
             <UserEventsTab />
           </TabsContent>
 
-          <TabsContent value="feed">
+          {/* <TabsContent value="feed">
             <FeedTab />
           </TabsContent>
 
@@ -102,7 +102,7 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
             <div className="gradient-card p-8 rounded-xl">
               <SocialTab />
             </div>
-          </TabsContent>
+          </TabsContent> */}
 
           <TabsContent value="profile">
             <ProfileTab userId={user.id} />

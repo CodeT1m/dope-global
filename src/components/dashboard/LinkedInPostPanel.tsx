@@ -25,9 +25,17 @@ interface LinkedInPostPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   eventTitle: string;
+  selectedPhotos?: string[];
+  photos?: { id: string; file_url: string }[];
 }
 
-const LinkedInPostPanel = ({ open, onOpenChange, eventTitle }: LinkedInPostPanelProps) => {
+const LinkedInPostPanel = ({
+  open,
+  onOpenChange,
+  eventTitle,
+  selectedPhotos = [],
+  photos = []
+}: LinkedInPostPanelProps) => {
   const [tone, setTone] = useState<string>("Professional");
   const [takeaways, setTakeaways] = useState("");
   const [generatedPost, setGeneratedPost] = useState("");
@@ -47,12 +55,17 @@ const LinkedInPostPanel = ({ open, onOpenChange, eventTitle }: LinkedInPostPanel
 
     setGenerating(true);
     try {
+      const selectedPhotoUrls = photos
+        .filter(p => selectedPhotos.includes(p.id))
+        .map(p => p.file_url);
+
       const { data, error } = await supabase.functions.invoke('generate-linkedin-post', {
         body: {
           takeaways,
           tone,
           includeEmojis,
           eventTitle,
+          imageUrls: selectedPhotoUrls,
         }
       });
 
@@ -75,18 +88,61 @@ const LinkedInPostPanel = ({ open, onOpenChange, eventTitle }: LinkedInPostPanel
     }
   };
 
-  const handleShareToLinkedIn = () => {
-    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
-    
-    // Copy post to clipboard
-    navigator.clipboard.writeText(generatedPost);
-    
-    toast({
-      title: "Post Copied!",
-      description: "Post copied to clipboard. Opening LinkedIn...",
-    });
-    
-    // Open LinkedIn share dialog
+  const downloadImage = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleShareToLinkedIn = async () => {
+    // 1. Prepare LinkedIn URL with pre-filled text
+    // Note: LinkedIn only supports text pre-fill via this specific feed URL pattern on desktop
+    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(generatedPost)}`;
+
+    // 2. Copy post to clipboard as backup
+    try {
+      await navigator.clipboard.writeText(generatedPost);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
+    }
+
+    // 3. Download selected photos
+    const selectedPhotoUrls = photos
+      .filter(p => selectedPhotos.includes(p.id))
+      .map(p => ({ url: p.file_url, id: p.id }));
+
+    if (selectedPhotoUrls.length > 0) {
+      toast({
+        title: "Text Copied to Clipboard!",
+        description: `Downloading ${selectedPhotoUrls.length} photo(s). Please drag & drop them into the LinkedIn window.`,
+        duration: 5000,
+      });
+
+      // Download images sequentially
+      for (const photo of selectedPhotoUrls) {
+        await downloadImage(photo.url, `photo-${photo.id}.jpg`);
+      }
+    } else {
+      toast({
+        title: "Text Copied to Clipboard!",
+        description: "Opening LinkedIn... Paste the text to publish.",
+      });
+    }
+
+    // 4. Open LinkedIn in new tab
     window.open(linkedInUrl, '_blank');
   };
 
@@ -99,6 +155,24 @@ const LinkedInPostPanel = ({ open, onOpenChange, eventTitle }: LinkedInPostPanel
             Share your experience from {eventTitle}
           </SheetDescription>
         </SheetHeader>
+
+        {selectedPhotos.length > 0 && (
+          <div className="mt-6">
+            <Label className="mb-2 block">Selected Photos ({selectedPhotos.length})</Label>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {photos
+                .filter(p => selectedPhotos.includes(p.id))
+                .map(photo => (
+                  <img
+                    key={photo.id}
+                    src={photo.file_url}
+                    alt="Selected"
+                    className="h-20 w-20 object-cover rounded-md flex-shrink-0"
+                  />
+                ))}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-6 mt-6">
           {/* Tone Selection */}

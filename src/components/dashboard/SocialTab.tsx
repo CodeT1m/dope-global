@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useFollow, useFollowersList } from "@/hooks/useConvex";
 import PhotographerReviewDialog from "./PhotographerReviewDialog";
 import FollowersDialog from "./FollowersDialog";
 import UserCard from "./UserCard";
@@ -16,7 +15,6 @@ interface UserProfile {
   full_name: string | null;
   avatar_url: string | null;
   is_photographer?: boolean;
-  is_following?: boolean;
 }
 
 interface EventWithPhotos {
@@ -57,6 +55,9 @@ const SocialTab = () => {
 
       if (error) throw error;
 
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id;
+
       // Check which users are photographers
       const { data: roles } = await supabase
         .from('user_roles')
@@ -68,7 +69,6 @@ const SocialTab = () => {
       const usersWithMeta = (data || []).map(u => ({
         ...u,
         is_photographer: photographerIds.has(u.id),
-        is_following: false,
       }));
 
       setUsers(usersWithMeta);
@@ -86,13 +86,13 @@ const SocialTab = () => {
       const { data: starredPhotos, error: photosError } = await supabase
         .from('photos')
         .select('event_id, events(id, title, location, event_date)')
-        .eq('stars_count', 1); // This would need a proper stars table in production
+        .eq('stars_count', 1);
 
       if (photosError) throw photosError;
 
       // Count photos per event
       const eventMap = new Map<string, EventWithPhotos>();
-      
+
       // For now, just show all events with photos as a placeholder
       const { data: events, error: eventsError } = await supabase
         .from('events')
@@ -122,39 +122,7 @@ const SocialTab = () => {
     fetchUserEvents(user.id);
   };
 
-  const handleFollowToggle = async (photographerId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const targetUser = users.find(u => u.id === photographerId);
-    if (!targetUser) return;
-
-    if (targetUser.is_following) {
-      await supabase
-        .from('photographer_followers')
-        .delete()
-        .eq('photographer_id', photographerId)
-        .eq('follower_id', user.id);
-      
-      toast({
-        title: "Unfollowed",
-        description: `You unfollowed ${targetUser.full_name || 'this photographer'}`,
-      });
-    } else {
-      await supabase
-        .from('photographer_followers')
-        .insert({ photographer_id: photographerId, follower_id: user.id });
-      
-      toast({
-        title: "Following",
-        description: `You're now following ${targetUser.full_name || 'this photographer'}`,
-      });
-    }
-
-    fetchUsers();
-  };
-
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     !locationFilter || (user.full_name?.toLowerCase().includes(locationFilter.toLowerCase()))
   );
 

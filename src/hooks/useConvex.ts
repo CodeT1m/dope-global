@@ -1,30 +1,38 @@
-import { useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { useToast } from "@/hooks/use-toast";
-
-// Convex integration - these hooks will be functional after running `npx convex dev`
-// and the API is generated. For now, using placeholder implementations.
 
 export function useFollow(userId: string, targetUserId: string) {
   const { toast } = useToast();
-  
-  // TODO: Replace with actual Convex implementation once API is generated
-  const isFollowing = false;
-  const followerCount = 0;
+
+  const isFollowing = useQuery(api.follows.isFollowing, {
+    followerId: userId,
+    followingId: targetUserId,
+  });
+
+  const followerCount = useQuery(api.follows.getFollowerCount, {
+    userId: targetUserId,
+  });
+
+  const follow = useMutation(api.follows.followUser);
+  const unfollow = useMutation(api.follows.unfollowUser);
 
   const handleFollow = async () => {
-    toast({
-      title: "Convex Initialization Required",
-      description: "Run 'npx convex dev' to enable real-time follow functionality",
-      variant: "destructive",
-    });
+    try {
+      await follow({ followerId: userId, followingId: targetUserId });
+      toast({ title: "Following", description: "You are now following this user" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to follow user", variant: "destructive" });
+    }
   };
 
   const handleUnfollow = async () => {
-    toast({
-      title: "Convex Initialization Required",
-      description: "Run 'npx convex dev' to enable real-time follow functionality",
-      variant: "destructive",
-    });
+    try {
+      await unfollow({ followerId: userId, followingId: targetUserId });
+      toast({ title: "Unfollowed", description: "You have unfollowed this user" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to unfollow user", variant: "destructive" });
+    }
   };
 
   return {
@@ -36,42 +44,20 @@ export function useFollow(userId: string, targetUserId: string) {
 }
 
 export function useFollowersList(userId: string) {
-  // TODO: Replace with actual Convex implementation
+  const followers = useQuery(api.follows.getFollowers, { userId });
+  const following = useQuery(api.follows.getFollowing, { userId });
+  const followerCount = useQuery(api.follows.getFollowerCount, { userId });
+  const followingCount = useQuery(api.follows.getFollowingCount, { userId });
+
   return {
-    followers: [],
-    following: [],
-    followerCount: 0,
-    followingCount: 0,
+    followers: followers || [],
+    following: following || [],
+    followerCount: followerCount || 0,
+    followingCount: followingCount || 0,
   };
 }
 
-export function useNotifications(userId: string) {
-  // TODO: Replace with actual Convex implementation
-  return {
-    notifications: [],
-    unreadCount: 0,
-    markAsRead: async () => {},
-    markAllAsRead: async () => {},
-  };
-}
-
-export function usePresence(userId: string) {
-  useEffect(() => {
-    // TODO: Replace with actual Convex presence tracking
-    console.log("Presence tracking ready for:", userId);
-  }, [userId]);
-}
-
-export function useChat(userId: string, otherUserId: string) {
-  // TODO: Replace with actual Convex implementation
-  const sendMessage = async (content: string) => {
-    console.log("Message ready to send:", content);
-  };
-
-  return {
-    messages: [],
-    unreadCount: 0,
-    sendMessage,
-    markAsRead: async () => {},
-  };
+export function usePhotoCount(userId: string) {
+  const photoCount = useQuery(api.uploads.getTotalPhotoCount, { photographerId: userId });
+  return photoCount || 0;
 }

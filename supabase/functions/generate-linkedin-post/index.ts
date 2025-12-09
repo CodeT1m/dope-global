@@ -1,19 +1,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { takeaways, tone, includeEmojis, eventTitle } = await req.json();
+    const { takeaways, tone, includeEmojis, eventTitle, imageUrls } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
+
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
@@ -22,13 +28,31 @@ serve(async (req) => {
 ${includeEmojis ? 'Include relevant emojis throughout the post.' : 'Do not use emojis.'}
 Keep the post concise and professional, typically 3-5 paragraphs.`;
 
-    let userPrompt = `Write a LinkedIn post about attending "${eventTitle}".
+    let userContent: any[] = [
+      {
+        type: "text",
+        text: `Write a LinkedIn post about attending "${eventTitle}".
 
 Tone: ${tone}
 Key takeaways from the attendee:
 ${takeaways}
 
-Make it engaging and authentic. ${tone === 'Rant' ? 'Express strong opinions and passion about the experience.' : ''}`;
+Make it engaging and authentic. ${tone === 'Rant' ? 'Express strong opinions and passion about the experience.' : ''}`
+      }
+    ];
+
+    if (imageUrls && imageUrls.length > 0) {
+      userContent[0].text += `\n\nI have attached ${imageUrls.length} photo(s) from the event. Please incorporate details from these photos into the post if relevant (e.g., describing the atmosphere, people, or setting).`;
+
+      imageUrls.forEach((url: string) => {
+        userContent.push({
+          type: "image_url",
+          image_url: {
+            url: url
+          }
+        });
+      });
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -37,10 +61,10 @@ Make it engaging and authentic. ${tone === 'Rant' ? 'Express strong opinions and
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-1.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
+          { role: "user", content: userContent }
         ],
       }),
     });

@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+# pillow # usually installed by face_recognition but good to have
+numpy<2
+face_recognition
+opencv-python-headless
+cmake
+requests
+

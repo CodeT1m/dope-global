@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Loader2, Linkedin } from "lucide-react";
+import { Camera, Loader2, Linkedin, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface ProfileTabProps {
@@ -50,6 +50,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
         x_handle: data.x_handle || "",
         linkedin_url: data.linkedin_url || "",
       });
+      setLocation(data.location || "");
     }
   };
 
@@ -60,8 +61,8 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${userId}/${fileName}`;
 
       // Create avatars bucket if it doesn't exist
       const { data: buckets } = await supabase.storage.listBuckets();
@@ -79,7 +80,17 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
         .from('avatars')
         .getPublicUrl(filePath);
 
-      setProfile({ ...profile, avatar_url: publicUrl });
+      // Update profile with new avatar URL immediately and save
+      const newProfile = { ...profile, avatar_url: publicUrl };
+      setProfile(newProfile);
+
+      // Save the avatar update to DB immediately
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", userId);
+
+      if (updateError) throw updateError;
 
       toast({
         title: "Avatar uploaded",
@@ -96,26 +107,26 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
     }
   };
 
-  const handleSave = async () => {
-    setLoading(true);
+  const handleRemoveAvatar = async () => {
+    if (!profile.avatar_url) return;
+
+    setUploading(true);
     try {
-      const { error } = await supabase
+      // Clear avatar URL in state immediately
+      const newProfile = { ...profile, avatar_url: "" };
+      setProfile(newProfile);
+
+      // Update DB
+      const { error: updateError } = await supabase
         .from("profiles")
-        .update({
-          full_name: profile.full_name,
-          bio: profile.bio,
-          avatar_url: profile.avatar_url,
-          instagram_handle: profile.instagram_handle,
-          x_handle: profile.x_handle,
-          linkedin_url: profile.linkedin_url,
-        })
+        .update({ avatar_url: null })
         .eq("id", userId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       toast({
-        title: "Success",
-        description: "Profile updated successfully",
+        title: "Avatar removed",
+        description: "Your profile picture has been removed",
       });
     } catch (error: any) {
       toast({
@@ -123,36 +134,73 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
         description: error.message,
         variant: "destructive",
       });
+      // Revert state if error
+      setProfile({ ...profile, avatar_url: profile.avatar_url });
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
-  const handleLinkedInConnect = async () => {
-    try {
-      const { error } = await supabase.auth.linkIdentity({
-        provider: 'linkedin_oidc',
-      });
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-      if (error) throw error;
+  const triggerAutoSave = (updatedProfile: typeof profile, updatedLocation: string) => {
+    setLoading(true);
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
 
-      toast({
-        title: "LinkedIn Connected",
-        description: "Your LinkedIn account has been linked",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            full_name: updatedProfile.full_name,
+            bio: updatedProfile.bio,
+            avatar_url: updatedProfile.avatar_url,
+            instagram_handle: updatedProfile.instagram_handle,
+            x_handle: updatedProfile.x_handle,
+            linkedin_url: updatedProfile.linkedin_url,
+            location: updatedLocation,
+          })
+          .eq("id", userId);
+
+        if (error) throw error;
+
+        // Optional: toast on success for auto-save might be too noisy, keeping it subtle or removing
+        // toast({ title: "Saved", duration: 1000 }); 
+      } catch (error: any) {
+        toast({
+          title: "Error saving changes",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }, 1000);
+  };
+
+  const updateProfileField = (field: keyof typeof profile, value: string) => {
+    const newProfile = { ...profile, [field]: value };
+    setProfile(newProfile);
+    triggerAutoSave(newProfile, location);
+  };
+
+  const updateLocation = (value: string) => {
+    setLocation(value);
+    triggerAutoSave(profile, value);
   };
 
   return (
     <div className="space-y-6">
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Profile Settings</h2>
+      <Card className="p-6 relative">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Profile Settings</h2>
+          {loading && (
+            <span className="text-sm text-muted-foreground flex items-center animate-pulse">
+              <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+              Saving...
+            </span>
+          )}
+        </div>
 
         {/* Avatar Upload */}
         <div className="mb-6">
@@ -171,31 +219,46 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
                 </div>
               )}
             </div>
-            <div>
-              <Label htmlFor="avatar-upload" className="cursor-pointer">
-                <Button variant="outline" asChild disabled={uploading}>
-                  <span>
-                    {uploading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Camera className="h-4 w-4 mr-2" />
-                        Change Photo
-                      </>
-                    )}
-                  </span>
+            <div className="flex flex-col gap-2">
+              <div>
+                <Label htmlFor="avatar-upload" className="cursor-pointer">
+                  <Button variant="outline" asChild disabled={uploading}>
+                    <span>
+                      {uploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="h-4 w-4 mr-2" />
+                          Change Photo
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </Label>
+                <Input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+              </div>
+
+              {profile.avatar_url && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 justify-start px-2 h-8"
+                  onClick={handleRemoveAvatar}
+                  disabled={uploading}
+                >
+                  <Trash2 className="h-3 w-3 mr-2" />
+                  Remove Photo
                 </Button>
-              </Label>
-              <Input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarUpload}
-              />
+              )}
             </div>
           </div>
         </div>
@@ -207,7 +270,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
             <Input
               id="full_name"
               value={profile.full_name}
-              onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+              onChange={(e) => updateProfileField("full_name", e.target.value)}
               placeholder="John Doe"
             />
           </div>
@@ -217,7 +280,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
             <Textarea
               id="bio"
               value={profile.bio}
-              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+              onChange={(e) => updateProfileField("bio", e.target.value)}
               placeholder="Tell us about yourself..."
               rows={3}
             />
@@ -228,7 +291,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
             <Input
               id="location"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(e) => updateLocation(e.target.value)}
               placeholder="Kuala Lumpur, Malaysia"
             />
           </div>
@@ -244,7 +307,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
             <Input
               id="instagram"
               value={profile.instagram_handle}
-              onChange={(e) => setProfile({ ...profile, instagram_handle: e.target.value })}
+              onChange={(e) => updateProfileField("instagram_handle", e.target.value)}
               placeholder="@username"
             />
           </div>
@@ -254,7 +317,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
             <Input
               id="x"
               value={profile.x_handle}
-              onChange={(e) => setProfile({ ...profile, x_handle: e.target.value })}
+              onChange={(e) => updateProfileField("x_handle", e.target.value)}
               placeholder="@username"
             />
           </div>
@@ -265,33 +328,16 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
               <Input
                 id="linkedin"
                 value={profile.linkedin_url}
-                onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })}
+                onChange={(e) => updateProfileField("linkedin_url", e.target.value)}
                 placeholder="https://linkedin.com/in/username"
                 className="flex-1"
               />
-              <Button
-                variant="outline"
-                onClick={handleLinkedInConnect}
-                title="Connect LinkedIn account"
-              >
-                <Linkedin className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </div>
       </Card>
 
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button
-          onClick={handleSave}
-          disabled={loading}
-          className="gradient-primary"
-        >
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Changes
-        </Button>
-      </div>
+      {/* Save Button Removed - Auto-save implemented */}
     </div>
   );
 };

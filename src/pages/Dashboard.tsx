@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import SuperadminDashboard from "@/components/dashboard/SuperadminDashboard";
 import PhotographerDashboard from "@/components/dashboard/PhotographerDashboard";
 import UserDashboard from "@/components/dashboard/UserDashboard";
+import { FaceMatchingProvider } from "@/context/FaceMatchingContext";
 
 type UserRole = 'superadmin' | 'admin' | 'user' | null;
 
@@ -22,6 +23,9 @@ const Dashboard = () => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        if (event === 'SIGNED_OUT') {
+          setLoading(false);
+        }
       }
     );
 
@@ -29,12 +33,17 @@ const Dashboard = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (!session) {
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
+    if (loading && !user) return;
+
     if (!user) {
       navigate("/auth");
       return;
@@ -51,7 +60,7 @@ const Dashboard = () => {
           .maybeSingle();
 
         if (error) throw error;
-        
+
         // Check for superadmin first, then admin, then default to user
         if (data?.role === 'superadmin') {
           setUserRole('superadmin');
@@ -69,7 +78,7 @@ const Dashboard = () => {
     };
 
     fetchUserRole();
-  }, [user, navigate]);
+  }, [user, navigate, loading]);
 
   if (loading || !user) {
     return (
@@ -79,16 +88,19 @@ const Dashboard = () => {
     );
   }
 
-  // Render appropriate dashboard based on role
-  if (userRole === 'superadmin') {
-    return <SuperadminDashboard user={user} />;
-  }
-
   if (userRole === 'admin') {
-    return <PhotographerDashboard user={user} />;
+    return (
+      <FaceMatchingProvider>
+        <PhotographerDashboard user={user} />
+      </FaceMatchingProvider>
+    );
   }
 
-  return <UserDashboard user={user} />;
+  return (
+    <FaceMatchingProvider>
+      <UserDashboard user={user} />
+    </FaceMatchingProvider>
+  );
 };
 
 export default Dashboard;

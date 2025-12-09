@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, UserMinus, Star, Camera, Users } from "lucide-react";
-import { useFollow, useFollowersList } from "@/hooks/useConvex";
+import { useFollow, usePhotoCount } from "@/hooks/useConvex";
 
 interface UserCardProps {
   user: {
@@ -18,8 +18,17 @@ interface UserCardProps {
 }
 
 const UserCard = ({ user, currentUserId, onReview, onViewFollowers }: UserCardProps) => {
-  const { isFollowing, followerCount, handleFollow, handleUnfollow } = useFollow(currentUserId, user.id);
   const isOwnProfile = currentUserId === user.id;
+  const { isFollowing, followerCount, handleFollow, handleUnfollow } = useFollow(currentUserId, user.id);
+  const photoCount = usePhotoCount(user.id);
+
+  const onToggleFollow = () => {
+    if (isFollowing) {
+      handleUnfollow();
+    } else {
+      handleFollow();
+    }
+  };
 
   return (
     <Card className="p-6 hover:shadow-lg transition-all duration-300 border-border/50 bg-card">
@@ -30,7 +39,7 @@ const UserCard = ({ user, currentUserId, onReview, onViewFollowers }: UserCardPr
             {user.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
           </AvatarFallback>
         </Avatar>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="text-lg font-semibold text-foreground truncate">
@@ -43,19 +52,28 @@ const UserCard = ({ user, currentUserId, onReview, onViewFollowers }: UserCardPr
               </Badge>
             )}
           </div>
-          
-          <button
-            onClick={onViewFollowers}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-          >
-            <Users className="h-4 w-4" />
-            {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
-          </button>
+
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+            {user.is_photographer ? (
+              <span className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                {followerCount !== undefined ? followerCount : '-'} {followerCount === 1 ? 'Follower' : 'Followers'}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <Camera className="h-4 w-4" />
+                {photoCount !== undefined ? photoCount : '-'} {photoCount === 1 ? 'Photo' : 'Photos'} Captured
+              </span>
+            )}
+          </div>
 
           {user.is_photographer && !isOwnProfile && (
             <div className="flex gap-2 mt-4">
               <Button
-                onClick={isFollowing ? handleUnfollow : handleFollow}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFollow();
+                }}
                 variant={isFollowing ? "outline" : "default"}
                 size="sm"
                 className="gap-2"
@@ -72,9 +90,12 @@ const UserCard = ({ user, currentUserId, onReview, onViewFollowers }: UserCardPr
                   </>
                 )}
               </Button>
-              
+
               <Button
-                onClick={onReview}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReview();
+                }}
                 variant="outline"
                 size="sm"
                 className="gap-2"

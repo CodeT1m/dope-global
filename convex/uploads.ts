@@ -50,3 +50,17 @@ export const updateUploadStatus = mutation({
     return { success: true };
   },
 });
+// Get total photo count for a photographer
+export const getTotalPhotoCount = query({
+  args: {
+    photographerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const uploads = await ctx.db
+      .query("uploads")
+      .withIndex("by_photographer", (q) => q.eq("photographerId", args.photographerId))
+      .collect();
+
+    return uploads.reduce((acc, curr) => acc + curr.photoCount, 0);
+  },
+});

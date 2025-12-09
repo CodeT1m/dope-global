@@ -37,14 +37,7 @@ const PhotoSlideshow = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
         <div className="relative w-full h-full flex items-center justify-center bg-black/90">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onOpenChange(false)}
-            className="absolute top-4 right-4 z-50 text-white hover:bg-white/20"
-          >
-            <X className="h-6 w-6" />
-          </Button>
+
 
           <Button
             variant="ghost"
