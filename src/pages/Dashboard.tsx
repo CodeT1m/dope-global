@@ -47,7 +47,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading && !user) return;
 
     if (!user && !eventId) {
       navigate("/auth");
