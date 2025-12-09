@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const UserEventsTab = () => {
   const [removalDialogOpen, setRemovalDialogOpen] = useState(false);
   const [removalPhotoId, setRemovalPhotoId] = useState<string | null>(null);
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
 
   const handleViewPhotos = (event: Event) => {
     setSelectedEvent(event);
@@ -158,8 +160,7 @@ const UserEventsTab = () => {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const eventId = params.get("event");
+    const eventId = searchParams.get("event");
 
     if (eventId && events.length > 0) {
       const event = events.find(e => e.id === eventId);
@@ -167,7 +168,7 @@ const UserEventsTab = () => {
         handleViewPhotos(event);
       }
     }
-  }, [events]);
+  }, [events, searchParams]);
 
   useEffect(() => {
     if (searchCity.trim() === "") {
@@ -187,7 +188,7 @@ const UserEventsTab = () => {
   const handleShareEvent = (event: Event | null = selectedEvent) => {
     if (!event) return;
 
-    const url = `${window.location.origin}/dashboard?event=${event.id}`;
+    const url = `${window.location.origin}/#/dashboard?event=${event.id}`;
     navigator.clipboard.writeText(url);
     toast({
       title: "Link Copied!",
