@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import EventEditDialog from "./EventEditDialog";
 import EventPhotosDialog from "./EventPhotosDialog";
 import BlogPostDialog from "./BlogPostDialog";
+import { useTranslation } from "react-i18next";
 
 interface Event {
   id: string;
@@ -29,6 +30,7 @@ const EventsListTab = () => {
   const [managingPhotosEvent, setManagingPhotosEvent] = useState<{ id: string; title: string } | null>(null);
   const [blogPostEvent, setBlogPostEvent] = useState<{ id: string; title: string } | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const fetchEvents = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -104,14 +106,14 @@ const EventsListTab = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading events...</div>;
+    return <div className="text-center py-8">{t('loading_events')}</div>;
   }
 
   if (events.length === 0) {
     return (
       <div className="text-center py-12 gradient-card rounded-xl p-8">
         <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
-        <p className="text-muted-foreground">No events yet. Create your first event to get started!</p>
+        <p className="text-muted-foreground">{t('no_events')}. {t('create_event_start')}</p>
       </div>
     );
   }
@@ -202,7 +204,7 @@ const EventsListTab = () => {
                     onClick={() => setEditingEvent(event)}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    {t('edit')}
                   </Button>
 
                   <Button
@@ -211,7 +213,7 @@ const EventsListTab = () => {
                     onClick={() => setManagingPhotosEvent({ id: event.id, title: event.title })}
                   >
                     <ImagePlus className="h-4 w-4 mr-2" />
-                    Photos
+                    {t('photos')}
                   </Button>
 
                   <Button
@@ -220,7 +222,7 @@ const EventsListTab = () => {
                     onClick={() => setBlogPostEvent({ id: event.id, title: event.title })}
                   >
                     <FileText className="h-4 w-4 mr-2" />
-                    Write Blog
+                    {t('write_blog')}
                   </Button>
 
                   <Button
@@ -229,7 +231,7 @@ const EventsListTab = () => {
                     onClick={() => handleShareEvent(event)}
                   >
                     <Share2 className="h-4 w-4 mr-2" />
-                    Share
+                    {t('share')}
                   </Button>
 
                   <Button
@@ -238,7 +240,7 @@ const EventsListTab = () => {
                     onClick={() => handleDelete(event.id)}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    {t('delete')}
                   </Button>
                 </div>
               </div>
@@ -259,7 +261,7 @@ const EventsListTab = () => {
                       className="w-full"
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      Download QR
+                      {t('download_qr')}
                     </Button>
                   </>
                 ) : (

@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Loader2, Linkedin, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 interface ProfileTabProps {
   userId: string;
@@ -16,6 +17,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [profile, setProfile] = useState({
     full_name: "",
@@ -25,6 +27,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
     x_handle: "",
     linkedin_url: "",
   });
+
 
   const [location, setLocation] = useState("");
 
@@ -37,20 +40,23 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
       .from("profiles")
       .select("*")
       .eq("id", userId)
-      .single();
+      .maybeSingle(); // Changed to maybeSingle to handle no rows gracefully, though single is fine. Sticking to structure.
+
+    // safe cast for now as we are adding location column
+    const profileData = data as any;
 
     if (error) {
       console.error("Error fetching profile:", error);
-    } else if (data) {
+    } else if (profileData) {
       setProfile({
-        full_name: data.full_name || "",
-        bio: data.bio || "",
-        avatar_url: data.avatar_url || "",
-        instagram_handle: data.instagram_handle || "",
-        x_handle: data.x_handle || "",
-        linkedin_url: data.linkedin_url || "",
+        full_name: profileData.full_name || "",
+        bio: profileData.bio || "",
+        avatar_url: profileData.avatar_url || "",
+        instagram_handle: profileData.instagram_handle || "",
+        x_handle: profileData.x_handle || "",
+        linkedin_url: profileData.linkedin_url || "",
       });
-      setLocation(data.location || "");
+      setLocation(profileData.location || "");
     }
   };
 
@@ -193,18 +199,18 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
     <div className="space-y-6">
       <Card className="p-6 relative">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Profile Settings</h2>
+          <h2 className="text-2xl font-bold">{t('profile_settings')}</h2>
           {loading && (
             <span className="text-sm text-muted-foreground flex items-center animate-pulse">
               <Loader2 className="h-3 w-3 mr-2 animate-spin" />
-              Saving...
+              {t('saving')}
             </span>
           )}
         </div>
 
         {/* Avatar Upload */}
         <div className="mb-6">
-          <Label className="mb-2 block">Profile Picture</Label>
+          <Label className="mb-2 block">{t('profile_picture')}</Label>
           <div className="flex items-center gap-4">
             <div className="relative w-24 h-24 rounded-full overflow-hidden bg-muted">
               {profile.avatar_url ? (
@@ -232,7 +238,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
                       ) : (
                         <>
                           <Camera className="h-4 w-4 mr-2" />
-                          Change Photo
+                          {t('change_photo')}
                         </>
                       )}
                     </span>
@@ -256,7 +262,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
                   disabled={uploading}
                 >
                   <Trash2 className="h-3 w-3 mr-2" />
-                  Remove Photo
+                  {t('remove_photo')}
                 </Button>
               )}
             </div>
@@ -266,7 +272,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
         {/* Basic Info */}
         <div className="space-y-6">
           <div>
-            <Label htmlFor="full_name" className="text-base font-semibold">Full Name</Label>
+            <Label htmlFor="full_name" className="text-base font-semibold">{t('full_name')}</Label>
             <Input
               id="full_name"
               value={profile.full_name}
@@ -276,7 +282,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
           </div>
 
           <div>
-            <Label htmlFor="bio">Bio</Label>
+            <Label htmlFor="bio">{t('bio')}</Label>
             <Textarea
               id="bio"
               value={profile.bio}
@@ -285,9 +291,8 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
               rows={3}
             />
           </div>
-
           <div>
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">{t('location')}</Label>
             <Input
               id="location"
               value={location}
@@ -300,10 +305,10 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
 
       {/* Social Links */}
       <Card className="p-6">
-        <h3 className="text-xl font-bold mb-4">Social Links</h3>
+        <h3 className="text-xl font-bold mb-4">{t('social_links')}</h3>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="instagram">Instagram Handle</Label>
+            <Label htmlFor="instagram">{t('instagram_handle')}</Label>
             <Input
               id="instagram"
               value={profile.instagram_handle}
@@ -313,7 +318,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
           </div>
 
           <div>
-            <Label htmlFor="x">X (Twitter) Handle</Label>
+            <Label htmlFor="x">{t('x_handle')}</Label>
             <Input
               id="x"
               value={profile.x_handle}
@@ -323,7 +328,7 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
           </div>
 
           <div>
-            <Label htmlFor="linkedin">LinkedIn URL</Label>
+            <Label htmlFor="linkedin">{t('linkedin_url')}</Label>
             <div className="flex gap-2">
               <Input
                 id="linkedin"
@@ -336,8 +341,6 @@ const ProfileTab = ({ userId }: ProfileTabProps) => {
           </div>
         </div>
       </Card>
-
-      {/* Save Button Removed - Auto-save implemented */}
     </div>
   );
 };

@@ -11,6 +11,7 @@ import { Calendar, MapPin, Image, ArrowLeft, Check, X, Download, FileText, Star,
 import LinkedInPostPanel from "./LinkedInPostPanel";
 import PhotoSlideshow from "./PhotoSlideshow";
 import PhotoRemovalDialog from "./PhotoRemovalDialog";
+import { useTranslation } from "react-i18next";
 
 interface Event {
   id: string;
@@ -46,6 +47,7 @@ const UserEventsTab = () => {
   const [removalPhotoId, setRemovalPhotoId] = useState<string | null>(null);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   const handleViewPhotos = (event: Event) => {
     setSelectedEvent(event);
@@ -358,7 +360,7 @@ const UserEventsTab = () => {
       )}
 
       {loading ? (
-        <div className="text-center py-12">Loading events...</div>
+        <div className="text-center py-12">{t('loading_events')}</div>
       ) : selectedEvent ? (
         <div className="space-y-6">
           {/* Header */}
@@ -374,7 +376,7 @@ const UserEventsTab = () => {
                 }}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Events
+                {t('back_to_events')}
               </Button>
               <Button
                 variant="outline"
@@ -382,7 +384,7 @@ const UserEventsTab = () => {
                 className="border-primary/50 hover:bg-primary/10"
               >
                 <Share2 className="h-4 w-4 mr-2" />
-                Share this Event
+                {t('share_this_event')}
               </Button>
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -416,7 +418,7 @@ const UserEventsTab = () => {
               </div>
               <Badge variant="outline">
                 <Image className="h-3 w-3 mr-1" />
-                {eventPhotos.length} photos
+                {eventPhotos.length} {t('photos')}
               </Badge>
             </div>
           </Card>
@@ -478,7 +480,7 @@ const UserEventsTab = () => {
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-background/95 backdrop-blur-md shadow-2xl border rounded-full px-6 py-3 flex items-center gap-4 animate-in slide-in-from-bottom-10 fade-in duration-300 w-max max-w-[90vw] overflow-x-auto">
               <Button onClick={handleDownloadAll} variant="outline" size="sm" className="whitespace-nowrap">
                 <Download className="h-4 w-4 mr-2" />
-                Download All ({eventPhotos.length})
+                {t('download_all')} ({eventPhotos.length})
               </Button>
 
               {selectedPhotos.length > 0 && (
@@ -486,11 +488,11 @@ const UserEventsTab = () => {
                   <div className="h-4 w-px bg-border mx-2"></div>
                   <Button onClick={handleDownloadSelected} variant="secondary" size="sm" className="whitespace-nowrap">
                     <Download className="h-4 w-4 mr-2" />
-                    Download Selected ({selectedPhotos.length})
+                    {t('download_selected')} ({selectedPhotos.length})
                   </Button>
                   <Button onClick={() => setLinkedInPanelOpen(true)} className="gradient-primary whitespace-nowrap" size="sm">
                     <FileText className="h-4 w-4 mr-2" />
-                    Generate Post
+                    {t('generate_post')}
                   </Button>
                   <Button onClick={() => setSelectedPhotos([])} variant="ghost" size="icon" className="h-8 w-8 ml-2 rounded-full hover:bg-destructive/10 hover:text-destructive" title="Clear Selection">
                     <X className="h-4 w-4" />
@@ -505,7 +507,7 @@ const UserEventsTab = () => {
           {/* Search */}
           <div>
             <Input
-              placeholder="Search by event, city, location, or community..."
+              placeholder={t('search_placeholder')}
               value={searchCity}
               onChange={(e) => setSearchCity(e.target.value)}
               className="max-w-md"
@@ -517,7 +519,7 @@ const UserEventsTab = () => {
             <div className="text-center py-12 gradient-card rounded-xl p-8">
               <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
               <p className="text-muted-foreground">
-                {searchCity ? "No events found for this location" : "No events available"}
+                {searchCity ? "No events found for this location" : t('no_events')}
               </p>
             </div>
           ) : (
@@ -532,7 +534,7 @@ const UserEventsTab = () => {
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                        {event.photo_count || 0} photos
+                        {event.photo_count || 0} {t('photos')}
                       </div>
                     </div>
                   )}
@@ -561,7 +563,7 @@ const UserEventsTab = () => {
                         onClick={() => handleToggleAttendance(event.id, event.attended || false)}
                       >
                         {event.attended ? <Check className="h-4 w-4 mr-2" /> : <X className="h-4 w-4 mr-2" />}
-                        {event.attended ? "Attended" : "Mark Attendance"}
+                        {event.attended ? t('attended') : t('mark_attendance')}
                       </Button>
                       <Button
                         variant="outline"
@@ -569,13 +571,13 @@ const UserEventsTab = () => {
                         onClick={() => handleViewPhotos(event)}
                       >
                         <Image className="h-4 w-4 mr-2" />
-                        View Photos
+                        {t('view_photos')}
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleShareEvent(event)}
-                        title="Share Event"
+                        title={t('share')}
                       >
                         <Share2 className="h-4 w-4" />
                       </Button>
