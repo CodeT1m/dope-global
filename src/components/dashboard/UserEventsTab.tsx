@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Image, ArrowLeft, Check, X, Download, FileText, Star, AlertCircle, Share2 } from "lucide-react";
+import { Calendar, MapPin, Image, ArrowLeft, Check, X, Download, FileText, Star, AlertCircle, Share2, User } from "lucide-react";
 import LinkedInPostPanel from "./LinkedInPostPanel";
 import PhotoSlideshow from "./PhotoSlideshow";
 import PhotoRemovalDialog from "./PhotoRemovalDialog";
@@ -416,6 +416,12 @@ const UserEventsTab = () => {
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span>{selectedEvent.location}</span>
               </div>
+              {selectedEvent.organizer_name && (
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedEvent.organizer_name}</span>
+                </div>
+              )}
               <Badge variant="outline">
                 <Image className="h-3 w-3 mr-1" />
                 {eventPhotos.length} {t('photos')}
@@ -554,6 +560,12 @@ const UserEventsTab = () => {
                         <MapPin className="h-3 w-3 text-muted-foreground" />
                         <span className="line-clamp-1">{event.location}</span>
                       </div>
+                      {event.organizer_name && (
+                        <div className="flex items-center gap-2">
+                          <User className="h-3 w-3 text-muted-foreground" />
+                          <span className="line-clamp-1">{event.organizer_name}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-2 flex-wrap mt-auto pt-2">

@@ -1,6 +1,8 @@
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Camera, Sparkles, Users, Zap } from "lucide-react";
-import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
 import heroDark from "@/assets/hero-dark.jpg";
@@ -16,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const Index = () => {
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   const currentTheme = theme === "system" ? systemTheme : theme;
@@ -23,6 +26,23 @@ const Index = () => {
   const logo = currentTheme === "dark" ? logoDark : logoLight;
   const thisIsDopeLogo = currentTheme === "dark" ? thisIsDopeDark : thisIsDopeLight;
   const { t } = useTranslation();
+
+  useEffect(() => {
+    // Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate("/dashboard");
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        navigate("/dashboard");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   return (
     <div className="min-h-screen">

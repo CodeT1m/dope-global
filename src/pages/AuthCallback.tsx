@@ -7,11 +7,19 @@ const AuthCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Handle the OAuth callback
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigate("/dashboard", { replace: true });
+      } else if (event === 'SIGNED_OUT') {
+        navigate("/auth", { replace: true });
+      }
+    });
+
+    // Fallback check
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/dashboard", { replace: true });
-      } else {
-        navigate("/auth", { replace: true });
       }
     });
   }, [navigate]);

@@ -49,6 +49,11 @@ const Dashboard = () => {
   useEffect(() => {
     if (loading && !user) return;
 
+    // Check if we are handling an auth callback in the hash
+    if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('error_description'))) {
+      return; // Wait for onAuthStateChange to handle it
+    }
+
     if (!user && !eventId) {
       navigate("/auth");
       return;
