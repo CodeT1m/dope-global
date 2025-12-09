@@ -190,7 +190,7 @@ const UserEventsTab = () => {
   const handleShareEvent = (event: Event | null = selectedEvent) => {
     if (!event) return;
 
-    const url = `${window.location.origin}/#/dashboard?event=${event.id}`;
+    const url = `${window.location.origin}/dashboard?event=${event.id}`;
     navigator.clipboard.writeText(url);
     toast({
       title: "Link Copied!",
