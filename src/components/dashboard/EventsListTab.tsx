@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Image, QrCode, Trash2, Edit, ImagePlus, Download, FileText } from "lucide-react";
+import { Calendar, MapPin, Image, QrCode, Trash2, Edit, ImagePlus, Download, FileText, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EventEditDialog from "./EventEditDialog";
 import EventPhotosDialog from "./EventPhotosDialog";
@@ -56,7 +56,7 @@ const EventsListTab = () => {
         const photos = event.photos || [];
         // Use the first photo as cover image for consistency
         const coverPhoto = photos.length > 0 ? photos[0] : null;
-        
+
         return {
           ...event,
           cover_image_url: coverPhoto?.file_url,
@@ -64,7 +64,7 @@ const EventsListTab = () => {
           photos: undefined, // Remove photos array from final object
         };
       });
-      
+
       setEvents(processedEvents);
     }
     setLoading(false);
@@ -74,6 +74,14 @@ const EventsListTab = () => {
     fetchEvents();
   }, []);
 
+  const handleShareEvent = (event: Event) => {
+    const url = `${window.location.origin}/dashboard?event=${event.id}`;
+    navigator.clipboard.writeText(url);
+    toast({
+      title: "Link Copied!",
+      description: "Share this link for others to view event photos.",
+    });
+  };
 
   const handleDelete = async (eventId: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
@@ -141,119 +149,128 @@ const EventsListTab = () => {
 
       <div className="space-y-6">
         {events.map((event) => (
-        <Card key={event.id} className="overflow-hidden">
-          <div className="grid md:grid-cols-[200px_1fr_200px] gap-6">
-            {/* Cover Photo */}
-            <div className="md:h-48 h-64 bg-muted relative overflow-hidden">
-              {event.cover_image_url ? (
-                <img
-                  src={event.cover_image_url}
-                  alt={event.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Image className="h-12 w-12 text-muted-foreground/50" />
-                </div>
-              )}
-              {event.photo_count !== undefined && (
-                <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                  {event.photo_count} photo{event.photo_count !== 1 ? 's' : ''}
-                </div>
-              )}
-            </div>
-
-            {/* Event Details */}
-            <div className="p-6">
-              <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
-              {event.description && (
-                <p className="text-muted-foreground mb-3 line-clamp-2">{event.description}</p>
-              )}
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{new Date(event.event_date).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>{event.location}</span>
-                </div>
-                {event.organizer_name && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Organizer:</span>
-                    <span>{event.organizer_name}</span>
+          <Card key={event.id} className="overflow-hidden">
+            <div className="grid md:grid-cols-[200px_1fr_200px] gap-6">
+              {/* Cover Photo */}
+              <div className="md:h-48 h-64 bg-muted relative overflow-hidden">
+                {event.cover_image_url ? (
+                  <img
+                    src={event.cover_image_url}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Image className="h-12 w-12 text-muted-foreground/50" />
+                  </div>
+                )}
+                {event.photo_count !== undefined && (
+                  <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                    {event.photo_count} photo{event.photo_count !== 1 ? 's' : ''}
                   </div>
                 )}
               </div>
 
-              {/* Actions */}
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditingEvent(event)}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
+              {/* Event Details */}
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
+                {event.description && (
+                  <p className="text-muted-foreground mb-3 line-clamp-2">{event.description}</p>
+                )}
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>{new Date(event.event_date).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{event.location}</span>
+                  </div>
+                  {event.organizer_name && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">Organizer:</span>
+                      <span>{event.organizer_name}</span>
+                    </div>
+                  )}
+                </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setManagingPhotosEvent({ id: event.id, title: event.title })}
-                >
-                  <ImagePlus className="h-4 w-4 mr-2" />
-                  Photos
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setBlogPostEvent({ id: event.id, title: event.title })}
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Write Blog
-                </Button>
-
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(event.id)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-            </div>
-
-            {/* QR Code Section */}
-            <div className="p-6 bg-muted/30 flex flex-col items-center justify-center">
-              {event.qr_code_url ? (
-                <>
-                  <img
-                    src={event.qr_code_url}
-                    alt="Event QR Code"
-                    className="w-32 h-32 object-contain mb-3"
-                  />
+                {/* Actions */}
+                <div className="mt-4 flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(event.qr_code_url, '_blank')}
-                    className="w-full"
+                    onClick={() => setEditingEvent(event)}
                   >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download QR
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
                   </Button>
-                </>
-              ) : (
-                <div className="text-center text-muted-foreground text-sm">
-                  <QrCode className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  No QR Code
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setManagingPhotosEvent({ id: event.id, title: event.title })}
+                  >
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    Photos
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setBlogPostEvent({ id: event.id, title: event.title })}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Write Blog
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShareEvent(event)}
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(event.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
                 </div>
-              )}
+              </div>
+
+              {/* QR Code Section */}
+              <div className="p-6 bg-muted/30 flex flex-col items-center justify-center">
+                {event.qr_code_url ? (
+                  <>
+                    <img
+                      src={event.qr_code_url}
+                      alt="Event QR Code"
+                      className="w-32 h-32 object-contain mb-3"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(event.qr_code_url, '_blank')}
+                      className="w-full"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download QR
+                    </Button>
+                  </>
+                ) : (
+                  <div className="text-center text-muted-foreground text-sm">
+                    <QrCode className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    No QR Code
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
         ))}
       </div>
     </>

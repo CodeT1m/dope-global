@@ -16,12 +16,13 @@ import SocialTab from "./SocialTab";
 import ProfileTab from "./ProfileTab";
 
 interface UserDashboardProps {
-  user: User;
+  user: User | null;
 }
 
 const UserDashboard = ({ user }: UserDashboardProps) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("discover");
+  // Default to 'events' for guests (shared link), 'discover' for logged in users
+  const [activeTab, setActiveTab] = useState(user ? "discover" : "events");
   const { theme } = useTheme();
   const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   const currentTheme = theme === "system" ? systemTheme : theme;
@@ -30,6 +31,10 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const handleSignIn = () => {
+    navigate("/auth");
   };
 
   return (
@@ -43,10 +48,17 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button onClick={handleSignOut} variant="outline" size="sm">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+            {user ? (
+              <Button onClick={handleSignOut} variant="outline" size="sm">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button onClick={handleSignIn} variant="default" size="sm" className="gradient-primary">
+                <UserCircle className="h-4 w-4 mr-2" />
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -55,19 +67,21 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 text-foreground">
-            Welcome!
+            {user ? "Welcome!" : "Welcome Guest!"}
           </h1>
           <p className="text-muted-foreground">
-            {user.email}
+            {user ? user.email : "View photos from shared events."}
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full max-w-3xl grid-cols-5">
-            <TabsTrigger value="discover">
-              <Search className="h-4 w-4 mr-2" />
-              Discover
-            </TabsTrigger>
+          <TabsList className={`grid w-full max-w-3xl ${user ? 'grid-cols-5' : 'grid-cols-1'}`}>
+            {user && (
+              <TabsTrigger value="discover">
+                <Search className="h-4 w-4 mr-2" />
+                Discover
+              </TabsTrigger>
+            )}
             <TabsTrigger value="events">
               <Calendar className="h-4 w-4 mr-2" />
               Events
@@ -80,15 +94,19 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
               <Users className="h-4 w-4 mr-2" />
               Social
             </TabsTrigger> */}
-            <TabsTrigger value="profile">
-              <UserCircle className="h-4 w-4 mr-2" />
-              Profile
-            </TabsTrigger>
+            {user && (
+              <TabsTrigger value="profile">
+                <UserCircle className="h-4 w-4 mr-2" />
+                Profile
+              </TabsTrigger>
+            )}
           </TabsList>
 
-          <TabsContent value="discover">
-            <PhotoDiscoveryTab />
-          </TabsContent>
+          {user && (
+            <TabsContent value="discover">
+              <PhotoDiscoveryTab />
+            </TabsContent>
+          )}
 
           <TabsContent value="events">
             <UserEventsTab />
@@ -104,9 +122,11 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
             </div>
           </TabsContent> */}
 
-          <TabsContent value="profile">
-            <ProfileTab userId={user.id} />
-          </TabsContent>
+          {user && (
+            <TabsContent value="profile">
+              <ProfileTab userId={user.id} />
+            </TabsContent>
+          )}
         </Tabs>
       </main>
     </div>

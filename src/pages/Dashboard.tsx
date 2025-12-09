@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const eventId = searchParams.get('event');
 
   useEffect(() => {
     // Set up auth state listener first
@@ -24,6 +26,9 @@ const Dashboard = () => {
         setSession(session);
         setUser(session?.user ?? null);
         if (event === 'SIGNED_OUT') {
+          // If we have an event ID, don't set loading to false immediately to avoid flash, 
+          // but we effectively stay loaded as guest. 
+          // Actually, if signed out, we just want to re-eval user state.
           setLoading(false);
         }
       }
@@ -42,10 +47,15 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (loading && !user) return;
+    if (loading) return;
+
+    if (!user && !eventId) {
+      navigate("/auth");
+      return;
+    }
 
     if (!user) {
-      navigate("/auth");
+      // Guest mode with event ID - treat as user role (guest) logic handled in UserDashboard
       return;
     }
 
@@ -78,13 +88,22 @@ const Dashboard = () => {
     };
 
     fetchUserRole();
-  }, [user, navigate, loading]);
+  }, [user, navigate, loading, eventId]);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
+    );
+  }
+
+  // Guest view (no user but has eventId)
+  if (!user) {
+    return (
+      <FaceMatchingProvider>
+        <UserDashboard user={null} />
+      </FaceMatchingProvider>
     );
   }
 
