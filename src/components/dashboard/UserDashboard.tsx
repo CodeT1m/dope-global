@@ -106,11 +106,11 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
             <TabsTrigger value="events">
               {t('events')}
             </TabsTrigger>
-            {user && (
+            {/* {user && (
               <TabsTrigger value="profile">
                 {t('profile')}
               </TabsTrigger>
-            )}
+            )} */}
           </TabsList>
 
           {user && (
@@ -123,11 +123,11 @@ const UserDashboard = ({ user }: UserDashboardProps) => {
             <UserEventsTab />
           </TabsContent>
 
-          {user && (
+          {/* {user && (
             <TabsContent value="profile">
               <ProfileTab userId={user.id} />
             </TabsContent>
-          )}
+          )} */}
         </Tabs>
       </main>
     </div>
