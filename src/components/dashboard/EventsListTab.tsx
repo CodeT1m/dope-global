@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteFolderFromR2 } from "@/utils/r2storage";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Image, QrCode, Trash2, Edit, ImagePlus, Download, FileText, Share2 } from "lucide-react";
@@ -36,39 +37,66 @@ const EventsListTab = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data, error } = await supabase
+    // 1. Fetch Events
+    const { data: eventsData, error: eventsError } = await supabase
       .from("events")
-      .select(`
-        *,
-        photos(id, file_url)
-      `)
+      .select("*")
       .eq("photographer_id", user.id)
       .order("event_date", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching events:", error);
+    if (eventsError) {
+      console.error("Error fetching events:", eventsError);
       toast({
         title: "Error",
-        description: "Failed to load events",
+        description: eventsError.message || "Failed to load events",
         variant: "destructive",
       });
-    } else {
-      // Process events to add cover image and photo count
-      const processedEvents = (data || []).map((event: any) => {
-        const photos = event.photos || [];
-        // Use the first photo as cover image for consistency
-        const coverPhoto = photos.length > 0 ? photos[0] : null;
-
-        return {
-          ...event,
-          cover_image_url: coverPhoto?.file_url,
-          photo_count: photos.length,
-          photos: undefined, // Remove photos array from final object
-        };
-      });
-
-      setEvents(processedEvents);
+      setLoading(false);
+      return;
     }
+
+    // 2. Fetch Photos for these events
+    const eventIds = eventsData.map(e => e.id);
+    console.log("Fetching photos for Event IDs:", eventIds);
+
+    let photosMap: Record<string, any[]> = {};
+
+    if (eventIds.length > 0) {
+      const { data: photosData, error: photosError } = await supabase
+        .from("images")
+        .select("id, public_url, event_id")
+        .in("event_id", eventIds)
+        .order("created_at", { ascending: false });
+
+      if (photosError) {
+        console.error("Error fetching photos:", photosError);
+      } else {
+        console.log("Fetched Photos Data:", photosData);
+        // Group photos by event_id
+        photosData?.forEach(photo => {
+          if (!photosMap[photo.event_id]) {
+            photosMap[photo.event_id] = [];
+          }
+          photosMap[photo.event_id].push(photo);
+        });
+      }
+    }
+
+    // 3. Merge Data
+    const processedEvents = (eventsData || []).map((event: any) => {
+      const photos = photosMap[event.id] || [];
+      const coverPhoto = photos.length > 0 ? photos[0] : null;
+
+      return {
+        ...event,
+        cover_image_url: coverPhoto?.public_url,
+        photo_count: photos.length,
+      };
+    });
+
+    console.log("Final Processed Events:", processedEvents);
+
+    setEvents(processedEvents);
     setLoading(false);
   };
 
@@ -86,7 +114,16 @@ const EventsListTab = () => {
   };
 
   const handleDelete = async (eventId: string) => {
-    if (!confirm("Are you sure you want to delete this event?")) return;
+    if (!confirm("Are you sure you want to delete this event? This will also delete all associated photos.")) return;
+
+    // Find event to get title for R2 folder deletion
+    const eventToDelete = events.find(e => e.id === eventId);
+
+    // Delete from R2 First
+    if (eventToDelete) {
+      toast({ title: "Deleting photos..." });
+      await deleteFolderFromR2(`Events/${eventToDelete.title}`);
+    }
 
     const { error } = await supabase
       .from("events")

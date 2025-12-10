@@ -48,15 +48,16 @@ const FeedTab = () => {
     const photographerIds = following?.map(f => f.photographer_id) || [];
 
     const { data: feedPhotos, error } = await supabase
-      .from("photos")
+      .from("images")
       .select(`
         id,
-        file_url,
+        id,
+        public_url,
         caption,
-        photographer_id,
+        user_id,
         profiles!photos_photographer_id_fkey(full_name)
       `)
-      .in("photographer_id", photographerIds)
+      .in("user_id", photographerIds)
       .order("created_at", { ascending: false })
       .limit(20);
 
@@ -76,12 +77,12 @@ const FeedTab = () => {
       const photoReactions = reactions?.filter(r => r.photo_id === photo.id) || [];
       const loveReactions = photoReactions.filter(r => r.reaction_type === 'love');
       const fireReactions = photoReactions.filter(r => r.reaction_type === 'fire');
-      
+
       return {
         id: photo.id,
-        file_url: photo.file_url,
+        file_url: photo.public_url,
         caption: photo.caption,
-        photographer_id: photo.photographer_id,
+        photographer_id: photo.user_id,
         love_count: loveReactions.length,
         fire_count: fireReactions.length,
         photographer_name: (photo.profiles as any)?.full_name || "Unknown",
@@ -90,7 +91,7 @@ const FeedTab = () => {
       };
     }) || [];
 
-    const sortedByEngagement = [...photosWithReactions].sort((a, b) => 
+    const sortedByEngagement = [...photosWithReactions].sort((a, b) =>
       (b.love_count + b.fire_count) - (a.love_count + a.fire_count)
     );
     if (sortedByEngagement.length > 0 && (sortedByEngagement[0].love_count + sortedByEngagement[0].fire_count) > 0) {

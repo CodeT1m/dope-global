@@ -12,7 +12,7 @@ import { Loader2, Sparkles, Plus, X, Share2 } from "lucide-react";
 
 interface Photo {
   id: string;
-  file_url: string;
+  public_url: string;
   caption?: string;
 }
 
@@ -51,8 +51,8 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
 
   const fetchPhotos = async () => {
     const { data, error } = await supabase
-      .from("photos")
-      .select("id, file_url, caption")
+      .from("images")
+      .select("id, public_url, caption")
       .eq("event_id", eventId)
       .order("created_at", { ascending: false });
 
@@ -95,7 +95,7 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-linkedin-post', {
-        body: { 
+        body: {
           takeaways: takeaways,
           eventTitle: eventTitle,
           category: category || "General",
@@ -248,7 +248,7 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
                   <SelectItem key={photo.id} value={photo.id}>
                     <div className="flex items-center gap-2">
                       <img
-                        src={photo.file_url}
+                        src={photo.public_url}
                         alt={photo.caption || "Photo"}
                         className="w-12 h-12 object-cover rounded"
                       />
@@ -261,7 +261,7 @@ const BlogPostDialog = ({ open, onOpenChange, eventId, eventTitle }: BlogPostDia
             {selectedPhoto && (
               <div className="mt-3">
                 <img
-                  src={selectedPhoto.file_url}
+                  src={selectedPhoto.public_url}
                   alt="Selected cover"
                   className="w-full h-48 object-contain rounded-lg border border-border"
                 />

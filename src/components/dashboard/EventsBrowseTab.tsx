@@ -56,7 +56,7 @@ const EventsBrowseTab = () => {
       const eventsWithCounts = await Promise.all(
         (data || []).map(async (event) => {
           const { count } = await supabase
-            .from("photos")
+            .from("images")
             .select("*", { count: "exact", head: true })
             .eq("event_id", event.id);
 
@@ -129,7 +129,7 @@ const EventsBrowseTab = () => {
               {/* Event Info */}
               <div className="p-4 space-y-3">
                 <h3 className="font-bold text-lg line-clamp-1">{event.title}</h3>
-                
+
                 {event.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {event.description}

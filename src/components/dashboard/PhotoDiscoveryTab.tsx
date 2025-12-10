@@ -113,7 +113,7 @@ const PhotoDiscoveryTab = () => {
 
     matches.filter(p => selectedPhotos.includes(p.id)).forEach(photo => {
       const link = document.createElement('a');
-      link.href = photo.file_url;
+      link.href = photo.public_url;
       link.download = `photo-${photo.id}.jpg`;
       link.target = '_blank';
       document.body.appendChild(link);
@@ -150,8 +150,8 @@ const PhotoDiscoveryTab = () => {
 
     try {
       const { data: allPhotos, error: fetchError } = await supabase
-        .from('photos')
-        .select('id, file_url')
+        .from('images')
+        .select('id, public_url')
         .limit(200);
 
       if (fetchError) throw fetchError;
@@ -170,7 +170,7 @@ const PhotoDiscoveryTab = () => {
 
       const formData = new FormData();
       formData.append('target', blob, 'target.jpg');
-      formData.append('candidates_json', JSON.stringify(allPhotos.map(p => ({ id: p.id, url: p.file_url }))));
+      formData.append('candidates_json', JSON.stringify(allPhotos.map(p => ({ id: p.id, url: p.public_url }))));
 
       const response = await fetch('http://localhost:8000/match-face/', {
         method: 'POST',
@@ -191,7 +191,7 @@ const PhotoDiscoveryTab = () => {
 
       const uiMatches = foundMatches.map((m: any) => ({
         id: m.id,
-        file_url: m.url,
+        public_url: m.url,
         distance: m.distance
       }));
 

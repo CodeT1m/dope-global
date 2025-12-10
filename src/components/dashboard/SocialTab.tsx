@@ -84,7 +84,7 @@ const SocialTab = () => {
     try {
       // Get all events that have photos starred by this user
       const { data: starredPhotos, error: photosError } = await supabase
-        .from('photos')
+        .from('images')
         .select('event_id, events(id, title, location, event_date)')
         .eq('stars_count', 1);
 

@@ -14,7 +14,7 @@ interface RemovalRequest {
   status: string;
   created_at: string;
   photos: {
-    file_url: string;
+    public_url: string;
     caption: string | null;
     events: {
       title: string;
@@ -38,9 +38,9 @@ const RemoveRequestsTab = () => {
 
     // Get photos owned by this photographer
     const { data: photos } = await supabase
-      .from("photos")
+      .from("images")
       .select("id")
-      .eq("photographer_id", user.id);
+      .eq("user_id", user.id);
 
     if (!photos || photos.length === 0) {
       setLoading(false);
@@ -55,7 +55,7 @@ const RemoveRequestsTab = () => {
       .select(`
         *,
         photos!inner (
-          file_url,
+          public_url,
           caption,
           event_id
         )
@@ -135,7 +135,7 @@ const RemoveRequestsTab = () => {
     // Update request status
     const { error: updateError } = await supabase
       .from("photo_removal_requests")
-      .update({ 
+      .update({
         status: 'approved',
         reviewed_by: user.id,
         reviewed_at: new Date().toISOString()
@@ -153,7 +153,7 @@ const RemoveRequestsTab = () => {
 
     // Delete the photo
     const { error: deleteError } = await supabase
-      .from("photos")
+      .from("images")
       .delete()
       .eq("id", photoId);
 
@@ -175,7 +175,7 @@ const RemoveRequestsTab = () => {
 
     const { error } = await supabase
       .from("photo_removal_requests")
-      .update({ 
+      .update({
         status: 'rejected',
         reviewed_by: user.id,
         reviewed_at: new Date().toISOString()
@@ -231,7 +231,7 @@ const RemoveRequestsTab = () => {
               <div className="space-y-4">
                 {request.photos && (
                   <img
-                    src={request.photos.file_url}
+                    src={request.photos.public_url}
                     alt={request.photos.caption || "Requested photo"}
                     className="w-full h-64 object-cover rounded-lg"
                   />

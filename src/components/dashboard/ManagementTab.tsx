@@ -41,7 +41,7 @@ const ManagementTab = () => {
 
   const fetchUsersAndRoles = async () => {
     setLoading(true);
-    
+
     // Fetch all profiles
     const { data: profilesData, error: profilesError } = await supabase
       .from("profiles")
@@ -102,12 +102,12 @@ const ManagementTab = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
+    const matchesSearch =
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
-    
+
     if (selectedRole === "all") return matchesSearch;
-    
+
     const userRole = getUserRole(user.id);
     return matchesSearch && userRole === selectedRole;
   });
@@ -239,11 +239,11 @@ const ManagementTab = () => {
                         {user.email}
                       </td>
                       <td className="px-6 py-4">
-                        <Badge 
+                        <Badge
                           variant={
-                            role === "superadmin" ? "default" : 
-                            role === "admin" ? "secondary" : 
-                            "outline"
+                            role === "superadmin" ? "default" :
+                              role === "admin" ? "secondary" :
+                                "outline"
                           }
                         >
                           {role === "admin" ? (
@@ -262,14 +262,14 @@ const ManagementTab = () => {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {new Date(user.created_at).toLocaleDateString()}
+                        {new Date(user.created_at).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
                           {role !== "superadmin" && (
                             <Select
                               value={role}
-                              onValueChange={(value) => 
+                              onValueChange={(value) =>
                                 handleRoleChange(user.id, value as "admin" | "user")
                               }
                             >

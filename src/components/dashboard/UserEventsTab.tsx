@@ -27,7 +27,7 @@ interface Event {
 
 interface Photo {
   id: string;
-  file_url: string;
+  public_url: string;
   thumbnail_url: string;
   caption?: string;
 }
@@ -74,7 +74,7 @@ const UserEventsTab = () => {
 
       const { data: eventsData, error } = await supabase
         .from("events")
-        .select("*, photos(id, file_url)")
+        .select("*, images(id, public_url)")
         .eq("is_active", true)
         .order("event_date", { ascending: false });
 
@@ -82,7 +82,7 @@ const UserEventsTab = () => {
 
       const eventsWithDetails = await Promise.all(
         (eventsData || []).map(async (event: any) => {
-          const photos = event.photos || [];
+          const photos = event.images || [];
           const photoCount = photos.length;
           const coverPhoto = photos.length > 0 ? photos[0] : null;
 
@@ -104,7 +104,7 @@ const UserEventsTab = () => {
             event_date: event.event_date,
             location: event.location,
             organizer_name: event.organizer_name,
-            cover_image_url: coverPhoto?.file_url,
+            cover_image_url: coverPhoto?.public_url,
             photo_count: photoCount,
             attended,
           };
@@ -129,7 +129,7 @@ const UserEventsTab = () => {
     const { data: { user } } = await supabase.auth.getUser();
 
     const { data, error } = await supabase
-      .from("photos")
+      .from("images")
       .select("*")
       .eq("event_id", eventId)
       .order("created_at", { ascending: false });
@@ -269,7 +269,7 @@ const UserEventsTab = () => {
     for (const photoId of selectedPhotos) {
       const photo = eventPhotos.find(p => p.id === photoId);
       if (photo) {
-        await downloadImage(photo.file_url, `photo-${photo.id}.jpg`);
+        await downloadImage(photo.public_url, `photo-${photo.id}.jpg`);
       }
     }
   };
@@ -284,7 +284,7 @@ const UserEventsTab = () => {
     });
 
     for (const photo of eventPhotos) {
-      await downloadImage(photo.file_url, `photo-${photo.id}.jpg`);
+      await downloadImage(photo.public_url, `photo-${photo.id}.jpg`);
     }
   };
 
@@ -344,7 +344,7 @@ const UserEventsTab = () => {
       )}
 
       <PhotoSlideshow
-        photos={eventPhotos.map(p => ({ id: p.id, file_url: p.file_url, caption: p.caption }))}
+        photos={eventPhotos.map(p => ({ id: p.id, public_url: p.public_url, caption: p.caption }))}
         currentIndex={slideshowIndex}
         open={slideshowOpen}
         onOpenChange={setSlideshowOpen}
@@ -471,7 +471,7 @@ const UserEventsTab = () => {
                     </Button>
                   </div>
                   <img
-                    src={photo.file_url}
+                    src={photo.public_url}
                     alt="Event photo"
                     className="w-full aspect-square object-cover rounded-lg cursor-pointer transition-transform hover:scale-105"
                     onClick={() => handlePhotoClick(index)}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { uploadToR2 } from "@/utils/r2storage";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -99,7 +100,7 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate all required fields
     if (!formData.title || !formData.eventDate || !formData.location) {
       toast({
@@ -184,33 +185,49 @@ const CreateEventDialog = ({ onEventCreated }: CreateEventDialogProps) => {
 
   const uploadPhotos = async (eventId: string, userId: string) => {
     const totalFiles = selectedFiles.length;
-    
+    let coverPhotoUrl = "";
+
     for (let i = 0; i < totalFiles; i++) {
       const file = selectedFiles[i];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${eventId}/${Math.random()}.${fileExt}`;
+      // Use R2 Upload
+      // Store in Events root folder
+      const uploadResult = await uploadToR2(file, `Events/${formData.title}`);
 
-      const { error: uploadError } = await supabase.storage
-        .from('event-photos')
-        .upload(fileName, file);
+      if (!uploadResult.success) {
+        console.error("R2 Upload failed:", uploadResult.error);
+        throw new Error(`R2 Upload failed: ${uploadResult.error?.message || 'Unknown error'}`);
+      }
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('event-photos')
-        .getPublicUrl(fileName);
+      // Capture first photo URL for cover image
+      if (i === 0) {
+        coverPhotoUrl = uploadResult.url;
+      }
 
       const { error: insertError } = await supabase
-        .from('photos')
+        .from('images')
         .insert({
           event_id: eventId,
-          file_url: publicUrl,
-          photographer_id: userId,
+          public_url: uploadResult.url,
+          storage_path: uploadResult.path,
+          user_id: userId,
         });
 
       if (insertError) throw insertError;
-      
+
       setUploadProgress(Math.round(((i + 1) / totalFiles) * 100));
+    }
+
+    // Update event cover photo with the first uploaded photo
+    if (coverPhotoUrl) {
+      const { error: updateError } = await supabase
+        .from("events")
+        .update({ cover_image_url: coverPhotoUrl })
+        .eq("id", eventId);
+
+      if (updateError) {
+        console.error("Error updating cover photo:", updateError);
+        // Don't throw here, as main upload succeeded
+      }
     }
   };
 

@@ -48,14 +48,14 @@ const PhotographerDashboard = ({ user }: PhotographerDashboardProps) => {
       .eq("photographer_id", user.id);
 
     const { count: photosCount } = await supabase
-      .from("photos")
+      .from("images")
       .select("*", { count: 'exact', head: true })
-      .eq("photographer_id", user.id);
+      .eq("user_id", user.id);
 
     const { data: photos } = await supabase
-      .from("photos")
+      .from("images")
       .select("id")
-      .eq("photographer_id", user.id);
+      .eq("user_id", user.id);
 
     const photoIds = photos?.map(p => p.id) || [];
     let reactionsCount = 0;

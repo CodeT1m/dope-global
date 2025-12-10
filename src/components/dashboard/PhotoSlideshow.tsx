@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface Photo {
   id: string;
-  file_url: string;
+  public_url: string;
   caption?: string;
 }
 
@@ -33,6 +33,8 @@ const PhotoSlideshow = ({
     onIndexChange(currentIndex < photos.length - 1 ? currentIndex + 1 : 0);
   };
 
+  if (!open || !currentPhoto) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
@@ -50,7 +52,7 @@ const PhotoSlideshow = ({
 
           <div className="flex flex-col items-center justify-center p-12">
             <img
-              src={currentPhoto?.file_url}
+              src={currentPhoto.public_url}
               alt={currentPhoto?.caption || "Photo"}
               className="max-w-full max-h-[80vh] object-contain"
             />

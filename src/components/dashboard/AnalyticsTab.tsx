@@ -30,9 +30,9 @@ const AnalyticsTab = () => {
 
       // Fetch photos count
       const { count: photosCount } = await supabase
-        .from("photos")
+        .from("images")
         .select("*", { count: 'exact', head: true })
-        .eq("photographer_id", user.id);
+        .eq("user_id", user.id);
 
       // Get event IDs
       const { data: events } = await supabase
@@ -44,9 +44,9 @@ const AnalyticsTab = () => {
 
       // Fetch reactions count for photographer's photos
       const { data: photos } = await supabase
-        .from("photos")
+        .from("images")
         .select("id")
-        .eq("photographer_id", user.id);
+        .eq("user_id", user.id);
 
       const photoIds = photos?.map(p => p.id) || [];
 

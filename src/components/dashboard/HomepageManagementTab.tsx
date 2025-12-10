@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToR2 } from "@/utils/r2storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,36 @@ const HomepageManagementTab = () => {
       setSections(data || []);
     }
     setLoading(false);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const sectionName = isEdit && editingId
+        ? sections.find(s => s.id === editingId)?.section_name
+        : newSection.section_name;
+
+      const folderName = sectionName ? `Events/${sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}` : 'Events/Misc';
+
+      toast.info("Uploading logo...");
+      const result = await uploadToR2(file, folderName);
+
+      if (result.success) {
+        if (isEdit) {
+          setEditForm(prev => ({ ...prev, logo_url: result.url }));
+        } else {
+          setNewSection(prev => ({ ...prev, logo_url: result.url }));
+        }
+        toast.success("Logo uploaded successfully");
+      } else {
+        throw new Error(result.error?.message || "Upload failed");
+      }
+    } catch (error: any) {
+      toast.error(`Upload failed: ${error.message}`);
+      console.error(error);
+    }
   };
 
   const handleAddSection = async () => {
@@ -172,6 +203,18 @@ const HomepageManagementTab = () => {
               value={editForm.logo_url || ""}
               onChange={(e) => setEditForm({ ...editForm, logo_url: e.target.value })}
             />
+            <div className="mt-2">
+              <Label htmlFor="upload-edit" className="cursor-pointer text-sm text-primary hover:underline">
+                Or upload image
+              </Label>
+              <Input
+                id="upload-edit"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, true)}
+              />
+            </div>
           </div>
           <div>
             <Label>Link URL</Label>
@@ -224,8 +267,8 @@ const HomepageManagementTab = () => {
           </div>
           <div className="mb-4">
             <div className={section.use_background ? "gradient-card p-4 rounded-lg" : "p-4"}>
-              <img 
-                src={section.logo_url} 
+              <img
+                src={section.logo_url}
                 alt={section.alt_text}
                 className="h-12 w-auto mx-auto"
               />
@@ -288,6 +331,18 @@ const HomepageManagementTab = () => {
               value={newSection.logo_url}
               onChange={(e) => setNewSection({ ...newSection, logo_url: e.target.value })}
             />
+            <div className="mt-2">
+              <Label htmlFor="upload-new" className="cursor-pointer text-sm text-primary hover:underline">
+                Or upload image
+              </Label>
+              <Input
+                id="upload-new"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, false)}
+              />
+            </div>
           </div>
 
           <div>
@@ -322,8 +377,8 @@ const HomepageManagementTab = () => {
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground mb-2">Without Background:</p>
                   <div className="p-4 border border-border rounded-lg bg-background flex items-center justify-center">
-                    <img 
-                      src={newSection.logo_url} 
+                    <img
+                      src={newSection.logo_url}
                       alt={newSection.alt_text}
                       className="h-16 w-auto"
                       onError={(e) => {
@@ -336,8 +391,8 @@ const HomepageManagementTab = () => {
                   <p className="text-sm text-muted-foreground mb-2">With Background:</p>
                   <div className="p-4 border border-border rounded-lg bg-background flex items-center justify-center">
                     <div className="gradient-card p-8 rounded-2xl">
-                      <img 
-                        src={newSection.logo_url} 
+                      <img
+                        src={newSection.logo_url}
                         alt={newSection.alt_text}
                         className="h-16 w-auto filter brightness-90"
                         onError={(e) => {
