@@ -112,6 +112,14 @@ const Dashboard = () => {
     );
   }
 
+  if (userRole === 'superadmin') {
+    return (
+      <FaceMatchingProvider>
+        <SuperadminDashboard user={user} />
+      </FaceMatchingProvider>
+    );
+  }
+
   if (userRole === 'admin') {
     return (
       <FaceMatchingProvider>
